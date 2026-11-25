@@ -14,7 +14,8 @@
 #include "app_hal/app_hal_delay.h"
 
 #include "../app_utils/trice/trice.h"
-#include "eeprom_emul.h"
+#include "../utilities/eeprom_emulation/core/eeprom_emul_core.h"
+#include "generated/utilities/mx_eeprom_emulation_app.h"
 
 /* Enable this macro to clear the uvCutoff Flag everytime on boot */
 #define ENABLE_FLASH_BIT_CLEAR			0
@@ -38,6 +39,7 @@
 static TaskHandle_t taskHandle;
 static uint8_t enFlashRead = 0;
 
+static ee_object_t eeObj = {};
 static int8_t Board_FlashRead(uint32_t *data);
 static int8_t Board_FlashWrite(uint32_t data);
 
@@ -205,25 +207,36 @@ static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 
 static int8_t Board_EEInit(void)
 {
-	EE_Status ee_status = EE_OK;
-	/* Unlock the Flash Program Erase controller */
-	HAL_FLASH_Unlock();
+	ee_status eeStatus = EE_OK;
+	eeObj.crc_object = EEPROM_EMULATION_CRC_HANDLE();
+	eeObj.f_object = EEPROM_EMULATION_FLASH_HANDLE();
+	eeObj.time_object = NULL;
 
-	ee_status = EE_Init(EE_FORCED_ERASE);
-	if(ee_status != EE_OK)
+	/* Unlock the Flash Program Erase controller */
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
 	{
 		return APP_ERR_STHAL;
 	}
+
+	eeStatus = EE_Init(&eeObj, EE_FORCED_ERASE);
+
 	/* Lock the Flash Program Erase controller */
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }
 
 static int8_t Board_FlashRead(uint32_t *data)
 {
-	EE_Status ee_status = EE_OK;
-
+	ee_status eeStatus = EE_OK;
 	uint16_t readAddress = FLASH_VAR_ADDRESS;
 
 	if(data == NULL)
@@ -231,34 +244,47 @@ static int8_t Board_FlashRead(uint32_t *data)
 		return APP_ERR_INV_ARG;
 	}
 
-	HAL_FLASH_Unlock();
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
-	ee_status = EE_ReadVariable32bits(readAddress, data);
-    if(ee_status != EE_OK)
-    {
-    	return APP_ERR_STHAL;
-    }
+	eeStatus = EE_ReadVariable32bits(readAddress, data);
 
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }
 
 static int8_t Board_FlashWrite(uint32_t data)
 {
-	EE_Status ee_status = EE_OK;
-
+	ee_status eeStatus = EE_OK;
 	uint16_t writeAddress = FLASH_VAR_ADDRESS;
 
-	HAL_FLASH_Unlock();
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
-	ee_status = EE_WriteVariable32bits(writeAddress, data);
-    if(ee_status != EE_OK)
-    {
-    	return APP_ERR_STHAL;
-    }
+	eeStatus = EE_WriteVariable32bits(writeAddress, data);
 
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }

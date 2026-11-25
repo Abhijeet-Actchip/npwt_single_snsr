@@ -25,11 +25,12 @@ int8_t SnsrMgrReadPlantData(plantData_t *snsrData)
 //	Board_GetIrriMotCurr(&snsrData->irigCurrent);
 //	Board_GetVacuumMotCurr(&snsrData->vacuumCurrent);
 //	Board_GetValveCurr(&snsrData->valveCurrent);
-	Board_GetRefPres(&snsrData->refPressure);
+//	Board_GetRefPres(&snsrData->refPressure);
 	Board_GetVacuumPres(&snsrData->vacuumPressure);
 
 	/* Implement cannister detection */
-	uint8_t currCanSt = Board_GetCannisterDetStatus();
+	uint8_t currCanSt = 0;
+//	= Board_GetCannisterDetStatus();
 
 	if(currCanSt == snsrData->tempCanDet)
 	{

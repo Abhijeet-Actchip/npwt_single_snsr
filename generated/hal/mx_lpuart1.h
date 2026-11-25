@@ -29,13 +29,13 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-/** Primary aliases for LPUART1_RX pin */
-#define DEBUG_RX_PORT                         HAL_GPIOB
-#define DEBUG_RX_PIN                          HAL_GPIO_PIN_13
-
 /** Primary aliases for LPUART1_TX pin */
 #define DEBUG_TX_PORT                         HAL_GPIOB
 #define DEBUG_TX_PIN                          HAL_GPIO_PIN_6
+
+/** Primary aliases for LPUART1_RX pin */
+#define DEBUG_RX_PORT                         HAL_GPIOB
+#define DEBUG_RX_PIN                          HAL_GPIO_PIN_13
 
 /* Exported macros -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/

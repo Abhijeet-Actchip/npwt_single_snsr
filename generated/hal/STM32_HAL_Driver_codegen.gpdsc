@@ -353,7 +353,7 @@
     <condition id="HAL CORE Init and CRC">
       <description>STMicroelectronics HAL CRC Init dependencies</description>
       <require condition="CMSIS Core"/>
-      <require Cclass="Device" Cgroup="STM32 LL" Csub="CRC"/>
+      <require Cclass="Device" Cgroup="STM32 HAL" Csub="CRC"/>
     </condition>
     <condition id="HAL CORE Init and CORTEX">
       <description>STMicroelectronics HAL CORTEX Init dependencies</description>
@@ -379,7 +379,7 @@
     <condition id="HAL CORE Init and IWDG">
       <description>STMicroelectronics HAL IWDG Init dependencies</description>
       <require condition="CMSIS Core"/>
-      <require Cclass="Device" Cgroup="STM32 LL" Csub="IWDG"/>
+      <require Cclass="Device" Cgroup="STM32 HAL" Csub="IWDG"/>
     </condition>
     <condition id="HAL CORE GPIO DMA Init and ADC">
       <description>STMicroelectronics HAL ADC Init dependencies</description>
@@ -474,7 +474,7 @@
       <description>STMicroelectronics HAL FLASH Init dependencies</description>
       <require condition="CMSIS Core"/>
       <require condition="HAL System Init"/>
-      <require Cclass="Device" Cgroup="STM32 LL" Csub="FLASH"/>
+      <require Cclass="Device" Cgroup="STM32 HAL" Csub="FLASH"/>
     </condition>
     <condition id="HAL CORE Init and SBS">
       <description>STMicroelectronics HAL SBS Init dependencies</description>
@@ -571,6 +571,13 @@
         <file category="header" name="stm32c5xx_hal_conf.h" />
       </files>
     </component>
+    <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="CORTEX DEBUG"   Cversion="2.1.0" condition="HAL CORE Init GPIO and CORTEX">
+      <description>TO BE DEFINED</description>
+      <files>
+        <file category="source" name="mx_cortex_debug.c" />
+        <file category="header" name="mx_cortex_debug.h" />
+      </files>
+    </component>
     <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="CORTEX MPU"   Cversion="2.1.0" condition="HAL CORE Init and CORTEX">
       <description>TO BE DEFINED</description>
       <files>
@@ -585,6 +592,20 @@
         <file category="header" name="mx_cortex_nvic.h" />
       </files>
     </component>
+    <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="CRC"   Cversion="2.1.0" condition="HAL CORE Init and CRC">
+      <description>TO BE DEFINED</description>
+      <files>
+        <file category="source" name="mx_crc.c" />
+        <file category="header" name="mx_crc.h" />
+      </files>
+    </component>
+    <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="FLASH"   Cversion="2.1.0" condition="HAL CORE Init and FLASH">
+      <description>TO BE DEFINED</description>
+      <files>
+        <file category="source" name="mx_flash.c" />
+        <file category="header" name="mx_flash.h" />
+      </files>
+    </component>
     <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="GPIO"   Cversion="2.1.0" condition="HAL GPIO Init">
       <description>TO BE DEFINED</description>
       <files>
@@ -597,6 +618,13 @@
       <files>
         <file category="source" name="mx_icache.c" />
         <file category="header" name="mx_icache.h" />
+      </files>
+    </component>
+    <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="IWDG"   Cversion="2.1.0" condition="HAL CORE Init and IWDG">
+      <description>TO BE DEFINED</description>
+      <files>
+        <file category="source" name="mx_iwdg.c" />
+        <file category="header" name="mx_iwdg.h" />
       </files>
     </component>
     <component generator="stm32c5xx_hal_mx2codegen" Cclass="Device" Cgroup="STM32CubeMX2 Config" Csub="RCC"   Cversion="2.1.0" condition="HAL CORE Init GPIO and RCC">

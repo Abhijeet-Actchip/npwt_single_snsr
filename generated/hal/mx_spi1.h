@@ -29,17 +29,17 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-/** Primary aliases for SPI1_SCK pin */
-#define DISPLAY_SCL_PORT                      HAL_GPIOA
-#define DISPLAY_SCL_PIN                       HAL_GPIO_PIN_5
+/** Primary aliases for SPI1_MOSI pin */
+#define DISPLAY_SDA_PORT                      HAL_GPIOA
+#define DISPLAY_SDA_PIN                       HAL_GPIO_PIN_7
 
 /** Primary aliases for SPI1_MISO pin */
 #define DISPLAY_SDO_PORT                      HAL_GPIOA
 #define DISPLAY_SDO_PIN                       HAL_GPIO_PIN_6
 
-/** Primary aliases for SPI1_MOSI pin */
-#define DISPLAY_SDA_PORT                      HAL_GPIOA
-#define DISPLAY_SDA_PIN                       HAL_GPIO_PIN_7
+/** Primary aliases for SPI1_SCK pin */
+#define DISPLAY_SCL_PORT                      HAL_GPIOA
+#define DISPLAY_SCL_PIN                       HAL_GPIO_PIN_5
 
 /* Exported macros -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/

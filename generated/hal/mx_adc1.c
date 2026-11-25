@@ -87,12 +87,12 @@ hal_adc_handle_t *mx_adc1_init(void)
   /**
     [GPIO Pin] ------> [Signal Name] ------> [Labels]
 
-       PA0     ------>   ADC1_IN0   ------>  VBAT_SENS
        PA1     ------>   ADC1_IN1   ------>  VACCUM_PRESSURE
+       PA0     ------>   ADC1_IN0   ------>  VBAT_SENS
     **/
   gpio_config.mode        = HAL_GPIO_MODE_ANALOG;
   gpio_config.pull        = HAL_GPIO_PULL_NO;
-  HAL_GPIO_Init(HAL_GPIOA, VBAT_SENS_PIN | VACCUM_PRESSURE_PIN, &gpio_config);
+  HAL_GPIO_Init(HAL_GPIOA, VACCUM_PRESSURE_PIN | VBAT_SENS_PIN, &gpio_config);
 
   return &hADC1;
 }
