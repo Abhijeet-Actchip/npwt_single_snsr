@@ -14,7 +14,8 @@ extern "C" {
 
 /* Enable these macros to run manual tests. */
 #define RUN_VACUUM_MOTOR_TEST			0
-#define RUN_ADC_TEST					0
+#define RUN_SENSOR_TEST					0
+#define RUN_SWITCHES_TEST				0
 #define RUN_GPIO_OUTPUT_TEST			0
 #define RUN_GPIO_INPUT_TEST				0
 #define RUN_PRESS_REGULATOR_TEST		0
