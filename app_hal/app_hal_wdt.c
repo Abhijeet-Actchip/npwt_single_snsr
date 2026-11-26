@@ -7,10 +7,6 @@
 
 #include "bsp/board.h"
 
-#if (APP_WDT_EN == 1)
-	extern IWDG_HandleTypeDef hiwdg;
-#endif
-
 /*!
  * \brief Clears the watchdog timer to prevent system reset.
  *
@@ -26,7 +22,7 @@
 int8_t APPHAL_WDT_Clear(void)
 {
 	#if (APP_WDT_EN == 1)
-		HAL_IWDG_Refresh(&hiwdg);
+		HAL_IWDG_Refresh(mx_iwdg_gethandle());
 	#endif
 
 	return APP_ERR_NONE;

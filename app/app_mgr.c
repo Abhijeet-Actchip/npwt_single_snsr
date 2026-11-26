@@ -54,12 +54,11 @@ static int8_t BoardPowerCtrl(bool en)
 	{
 		trice(iD(4944), "dbg: APP-MGR : Board Power ON\n");
 		/* Turn ON Device */
-		/* Enable 5V Buck converter */
-		Board_Enable5VBuck(1);
+		/* Enable Display power */
+//		Board_EnableDisplayPwr(1);
+		Board_CtrlDisplayBacklight(1);
 		APPHAL_Delay(100);
 		Board_LedPwrOnCtrl(1);
-		/* Enable power to Display board */
-		Board_EnableAuxPwr(1);
 	}
 	else
 	{
@@ -67,56 +66,56 @@ static int8_t BoardPowerCtrl(bool en)
 		/* Turn OFF Device */
 		Board_LedPwrOnCtrl(0);
 		/* Disable Power to Display board */
-		Board_EnableAuxPwr(0);
 		Board_EnableBoostConv(0);
-		Board_Enable5VBuck(0);
+//		Board_EnableDisplayPwr(0);
+		Board_CtrlDisplayBacklight(0);
 	}
 
 	state = en;
 	return APP_ERR_NONE;
 }
 
-static int8_t PollPowerSw(uint8_t *deviceSt)
-{
-	static uint16_t swCtr;
-	uint8_t swPressed = 0;
-	uint32_t uvCutoffSensed = 1;
-
-	if(Board_PowerSwSensed())
-	{
-		if(swCtr < POWER_SW_PRESS_THRESH)
-		{
-			swCtr++;
-		}
-		else
-		{
-			swPressed = 1;
-			swCtr = 0;
-		}
-	}
-	else
-	{
-		swCtr = 0;
-	}
-
-	if(swPressed)
-	{
-		/* Read Flash and Allow Board Power Ctrl */
-		Board_FlashRead(&uvCutoffSensed);
-
-		if(uvCutoffSensed)
-		{
-			*deviceSt = !(*deviceSt);
-			BoardPowerCtrl(*deviceSt);
-		}
-
-		/* Wait till Switch is released */
-		while(Board_PowerSwSensed())
-			APPHAL_Delay(100);
-	}
-
-	return APP_ERR_NONE;
-}
+//static int8_t PollPowerSw(uint8_t *deviceSt)
+//{
+//	static uint16_t swCtr;
+//	uint8_t swPressed = 0;
+//	uint32_t uvCutoffSensed = 1;
+//
+//	if(Board_PowerSwSensed())
+//	{
+//		if(swCtr < POWER_SW_PRESS_THRESH)
+//		{
+//			swCtr++;
+//		}
+//		else
+//		{
+//			swPressed = 1;
+//			swCtr = 0;
+//		}
+//	}
+//	else
+//	{
+//		swCtr = 0;
+//	}
+//
+//	if(swPressed)
+//	{
+//		/* Read Flash and Allow Board Power Ctrl */
+//		Board_FlashRead(&uvCutoffSensed);
+//
+//		if(uvCutoffSensed)
+//		{
+//			*deviceSt = !(*deviceSt);
+//			BoardPowerCtrl(*deviceSt);
+//		}
+//
+//		/* Wait till Switch is released */
+//		while(Board_PowerSwSensed())
+//			APPHAL_Delay(100);
+//	}
+//
+//	return APP_ERR_NONE;
+//}
 
 
 static int8_t BatteryMonitoring(bool en)
@@ -158,7 +157,7 @@ static int8_t BatteryMonitoring(bool en)
 static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 {
 	static uint8_t jackCtr = 0;
-	uint8_t curState = Board_PowerJackDet();
+	uint8_t curState; //= Board_PowerJackDet();
 	uint32_t uvCutoffSensed = 1;
 
 	if(curState == *prevState)
@@ -186,8 +185,6 @@ static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 				trice(iD(1183), "dbg: APP-MGR : Jack Detected\n");
 				*status = 0;
 				Board_EnableBoostConv(0);
-				Board_DisableBatChrg(0);
-				Board_Enable5VBuck(1);
 
 				/* Set Flash variable */
 				Board_FlashWrite(1);
@@ -305,9 +302,6 @@ static void AppMgrTask(void *args)
 	uint8_t isRunningOnBat = 0;
 	uint8_t tempJackSt = 0;			// To Store Temp jack state
 
-	/* Enable Battery Charging */
-	Board_DisableBatChrg(0);
-
 	/* Enable battery Voltage divider */
 	Board_EnableBatVDiv(1);
 
@@ -342,7 +336,7 @@ static void AppMgrTask(void *args)
 			enFlashRead = 0;
 			BoardPowerCtrl(isDeviceOn);
 		}
-		PollPowerSw(&isDeviceOn);
+//		PollPowerSw(&isDeviceOn);
 		PollPowerJack(&tempJackSt, &isRunningOnBat);
 		BatteryMonitoring(isRunningOnBat);
 #endif

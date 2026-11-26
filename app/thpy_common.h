@@ -8,7 +8,6 @@
 #ifndef __THPY_COMMON_H__
 #define __THPY_COMMON_H__				1
 
-#include "msgs/npwt_msgs.pb.h"
 #include "snsr_mgr.h"
 #include "FreeRTOS.h"
 #include "semphr.h"

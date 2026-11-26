@@ -57,13 +57,22 @@ int8_t Board_InitPeripherals(void)
 		return retVal;
 	}
 
+	#if (APP_WDT_EN == 1)
+		retVal = APP_ERR_INV_STATE;
+		if(mx_iwdg_init() != NULL)
+		{
+			/* We need to explicitly start IWDG */
+			if(mx_iwdg_start() != HAL_OK)
+			{
+				return retVal;
+			}
+			retVal = APP_ERR_NONE;
+		}
+	#endif
+
+	Board_EnableDisplayPwr(1);
 	/* Keep the valve closed */
 	Board_CtrlValve(0);
-
-	#if (APP_WDT_EN == 1)
-		/** TODO: Init IWDT and set it as non callable, so that, it can be manually called here,
-		 *        instead of being called in mx_system_init	*/
-	#endif
 
 	return retVal;
 }
@@ -169,6 +178,32 @@ bool Board_GetDIN5(void)
 {
 	return HAL_GPIO_ReadPin(DI_5_PORT, DI_5_PIN);
 }
+
+bool Board_ReadSwUP(void)
+{
+	return Board_GetDIN1();
+}
+
+bool Board_ReadSwDOWN(void)
+{
+	return Board_GetDIN4();
+}
+
+bool Board_ReadSwENTER(void)
+{
+	return Board_GetDIN2();
+}
+
+bool Board_ReadSwRIGHT(void)
+{
+	return Board_GetDIN3();
+}
+
+bool Board_ReadSwLEFT(void)
+{
+	return Board_GetDIN5();
+}
+
 
 static int8_t SetPWMChannel(hal_tim_handle_t *htim,
                             hal_tim_channel_t channel,
