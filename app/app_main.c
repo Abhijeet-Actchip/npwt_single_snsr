@@ -10,6 +10,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "app_hal/app_hal_wdt.h"
+#include "gui_mgr.h"
 //#include "thpy_mgr.h"
 #include "app_mgr.h"
 #include "diag_svc.h"
@@ -26,6 +27,9 @@ int main(void)
 
 	/* Run manual tests if any enabled. */
 	ManualTestRunner();
+
+	retVal = GuiMgrInit();
+	APP_ASSERT(retVal == APP_ERR_NONE);
 
 	retVal = AppMgrInit();
 	APP_ASSERT(retVal == APP_ERR_NONE);

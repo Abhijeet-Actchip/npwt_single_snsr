@@ -24,6 +24,9 @@ int8_t Board_EnableBatVDiv(bool en);
 int8_t Board_EnableVacuumMot(bool en);
 int8_t Board_EnableBoostConv(bool en);
 int8_t Board_EnableDisplayPwr(bool en);
+int8_t Board_EnableDisplayCS(bool en);
+int8_t Board_CtrlDisplayReset(bool en);
+int8_t Board_CtrlDisplayRS(bool en);
 
 int8_t Board_CtrlDisplayBacklight(bool en);
 int8_t Board_CtrlVacuumMot(uint8_t speedPer);

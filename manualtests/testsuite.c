@@ -459,6 +459,118 @@ static inline void StartTestTask(TaskFunction_t taskFn, const char *taskName)
 
 #endif
 
+#if (RUN_DISPLAY_TEXT_TEST == 1) || (RUN_DISPLAY_BUTTONS_TEST == 1)
+
+#include "app_middlewares/lvgl/lvgl.h"
+#include "app_drivers/lv_port_st7789.h"
+
+#define DISP_TEST_LOOP_MS			20U
+
+	static void InitDisplayForTest(void)
+	{
+		Board_EnableDisplayPwr(1);
+		Board_CtrlDisplayBacklight(1);
+		lv_init();
+		APP_ASSERT(lv_disp_st7789_init() == APP_ERR_NONE);
+	}
+
+#endif
+
+#if (RUN_DISPLAY_TEXT_TEST == 1)
+
+	static void TestThread(void *args)
+	{
+		(void)args;
+		InitDisplayForTest();
+
+		lv_obj_t *label = lv_label_create(lv_screen_active());
+		lv_label_set_text(label, "NPWT_TEST_DISPLAY");
+		lv_obj_center(label);
+
+		while(1)
+		{
+			lv_timer_handler();
+			APPHAL_Delay(DISP_TEST_LOOP_MS);
+			lv_tick_inc(DISP_TEST_LOOP_MS);
+		}
+	}
+
+	static void Test_DisplayText(void)
+	{
+		StartTestTask(TestThread, "TEST-DISP-TEXT");
+	}
+
+#endif
+
+#if (RUN_DISPLAY_BUTTONS_TEST == 1)
+
+/* Adjust if switches are active-high on hardware */
+#define DISP_BTN_ACTIVE_STATE		false
+
+	typedef struct
+	{
+		const char *name;
+		bool (*readFn)(void);
+		lv_obj_t *label;
+		bool prevPressed;
+	} disp_btn_state_t;
+
+	static void TestThread(void *args)
+	{
+		(void)args;
+		InitDisplayForTest();
+
+		disp_btn_state_t buttons[] = {
+			{ "UP",    Board_ReadSwUP,    NULL, false },
+			{ "DOWN",  Board_ReadSwDOWN,  NULL, false },
+			{ "ENTER", Board_ReadSwENTER, NULL, false },
+			{ "LEFT",  Board_ReadSwLEFT,  NULL, false },
+			{ "RIGHT", Board_ReadSwRIGHT, NULL, false },
+		};
+		const size_t btnCount = sizeof(buttons) / sizeof(buttons[0]);
+
+		lv_obj_t *cont = lv_obj_create(lv_screen_active());
+		lv_obj_set_size(cont, LV_PCT(90), LV_PCT(90));
+		lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
+		lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+		lv_obj_center(cont);
+
+		for(size_t i = 0U; i < btnCount; i++)
+		{
+			buttons[i].label = lv_label_create(cont);
+			buttons[i].prevPressed = (buttons[i].readFn() == DISP_BTN_ACTIVE_STATE);
+			lv_label_set_text_fmt(buttons[i].label, "%s : %s",
+			                      buttons[i].name,
+			                      buttons[i].prevPressed ? "PRESSED" : "RELEASED");
+		}
+
+		while(1)
+		{
+			for(size_t i = 0U; i < btnCount; i++)
+			{
+				bool pressed = (buttons[i].readFn() == DISP_BTN_ACTIVE_STATE);
+				if(pressed != buttons[i].prevPressed)
+				{
+					buttons[i].prevPressed = pressed;
+					lv_label_set_text_fmt(buttons[i].label, "%s : %s",
+					                      buttons[i].name,
+					                      pressed ? "PRESSED" : "RELEASED");
+				}
+			}
+
+			lv_timer_handler();
+			APPHAL_Delay(DISP_TEST_LOOP_MS);
+			lv_tick_inc(DISP_TEST_LOOP_MS);
+		}
+	}
+
+	static void Test_DisplayButtons(void)
+	{
+		StartTestTask(TestThread, "TEST-DISP-BTNS");
+	}
+
+#endif
+
 void ManualTestRunner(void)
 {
 	#if (RUN_VACUUM_MOTOR_TEST == 1)
@@ -499,5 +611,13 @@ void ManualTestRunner(void)
 
 	#if (RUN_BATTERY_CHARGING_TEST == 1)
 		Test_BatteryCharging();
+	#endif
+
+	#if (RUN_DISPLAY_TEXT_TEST == 1)
+		Test_DisplayText();
+	#endif
+
+	#if (RUN_DISPLAY_BUTTONS_TEST == 1)
+		Test_DisplayButtons();
 	#endif
 }

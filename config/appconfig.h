@@ -23,13 +23,22 @@ extern "C" {
 /* Define application specific settings macros here. */
 #define SELECT_BOARD                BOARD_ID_V1_0
 
+/* Display resolution. */
+#define DISP_HOR_RES				320
+#define DISP_VER_RES				240
 
 /* Task priorities and stack sizes. */
+#define GUI_TICK_PRIORITY			(tskIDLE_PRIORITY + 5)
+#define GUI_TICK_STACK_SIZE			128
+
 #define THERAPY_MGR_PRIORITY		(tskIDLE_PRIORITY + 3)
 #define THERAPY_MGR_STACK_SIZE		512
 
 #define APP_MGR_PRIORITY			(tskIDLE_PRIORITY + 2)
 #define APP_MGR_STACK_SIZE			256
+
+#define GUI_MGR_PRIORITY			(tskIDLE_PRIORITY + 1)
+#define GUI_MGR_STACK_SIZE			1024
 
 #define DIAG_SVC_PRIORITY			(tskIDLE_PRIORITY + 1)
 #define DIAG_SVC_STACK_SIZE			512
@@ -59,6 +68,14 @@ extern "C" {
 /******************** Advanced user settings below (DO NOT EDIT) ********************/
 
 #define ARRAY_SIZE(foo)             (sizeof(foo)/sizeof(foo[0]))
+
+/* Set a bit in a variable */
+#define SBI(val, bit)               val |= (1 << bit)
+/* Clear a bit in a variable */
+#define CBI(val, bit)               val &= ~(1 << bit)
+/* Check if a bit is set in a variable */
+#define BIT_IS_SET(val, bit)         ((val) & (1 << (bit)))
+
 
 #ifdef TEST
     #define STATIC

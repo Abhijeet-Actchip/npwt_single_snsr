@@ -157,7 +157,7 @@ static int8_t BatteryMonitoring(bool en)
 static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 {
 	static uint8_t jackCtr = 0;
-	uint8_t curState; //= Board_PowerJackDet();
+	uint8_t curState = 0; //= Board_PowerJackDet();
 	uint32_t uvCutoffSensed = 1;
 
 	if(curState == *prevState)
