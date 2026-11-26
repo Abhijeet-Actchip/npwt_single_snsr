@@ -12,10 +12,9 @@
 #include "task.h"
 #include "semphr.h"
 #include "timers.h"
-#include "utils/trice/trice.h"
-#include "utils/assert/app_assert.h"
+#include "app_utils/trice/trice.h"
+#include "app_utils/assert/app_assert.h"
 #include "thpy_base.h"
-#include "irig_mgr.h"
 
 #define PER_TIMER_INT_MS				100
 

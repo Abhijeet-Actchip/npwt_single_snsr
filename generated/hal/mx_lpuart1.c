@@ -76,15 +76,15 @@ hal_uart_handle_t *mx_lpuart1_uart_init(void)
   /**
     [GPIO Pin] ------> [Signal Name] ------> [Labels]
 
-       PB13    ------>   LPUART1_RX   ------>  DEBUG_RX
        PB6     ------>   LPUART1_TX   ------>  DEBUG_TX
+       PB13    ------>   LPUART1_RX   ------>  DEBUG_RX
     **/
   gpio_config.mode        = HAL_GPIO_MODE_ALTERNATE;
   gpio_config.output_type = HAL_GPIO_OUTPUT_PUSHPULL;
   gpio_config.pull        = HAL_GPIO_PULL_NO;
   gpio_config.speed       = HAL_GPIO_SPEED_FREQ_LOW;
   gpio_config.alternate   = HAL_GPIO_AF_8;
-  HAL_GPIO_Init(HAL_GPIOB, DEBUG_RX_PIN | DEBUG_TX_PIN, &gpio_config);
+  HAL_GPIO_Init(HAL_GPIOB, DEBUG_TX_PIN | DEBUG_RX_PIN, &gpio_config);
 
   /* Enable interrupt */
   HAL_CORTEX_NVIC_SetPriority(LPUART1_IRQn, HAL_CORTEX_NVIC_PREEMP_PRIORITY_5, HAL_CORTEX_NVIC_SUB_PRIORITY_0);

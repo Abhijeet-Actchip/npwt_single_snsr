@@ -14,7 +14,8 @@
 #include "app_hal/app_hal_delay.h"
 
 #include "../app_utils/trice/trice.h"
-#include "eeprom_emul.h"
+#include "../utilities/eeprom_emulation/core/eeprom_emul_core.h"
+#include "generated/utilities/mx_eeprom_emulation_app.h"
 
 /* Enable this macro to clear the uvCutoff Flag everytime on boot */
 #define ENABLE_FLASH_BIT_CLEAR			0
@@ -38,6 +39,7 @@
 static TaskHandle_t taskHandle;
 static uint8_t enFlashRead = 0;
 
+static ee_object_t eeObj = {};
 static int8_t Board_FlashRead(uint32_t *data);
 static int8_t Board_FlashWrite(uint32_t data);
 
@@ -52,12 +54,11 @@ static int8_t BoardPowerCtrl(bool en)
 	{
 		trice(iD(4944), "dbg: APP-MGR : Board Power ON\n");
 		/* Turn ON Device */
-		/* Enable 5V Buck converter */
-		Board_Enable5VBuck(1);
+		/* Enable Display power */
+//		Board_EnableDisplayPwr(1);
+		Board_CtrlDisplayBacklight(1);
 		APPHAL_Delay(100);
 		Board_LedPwrOnCtrl(1);
-		/* Enable power to Display board */
-		Board_EnableAuxPwr(1);
 	}
 	else
 	{
@@ -65,56 +66,56 @@ static int8_t BoardPowerCtrl(bool en)
 		/* Turn OFF Device */
 		Board_LedPwrOnCtrl(0);
 		/* Disable Power to Display board */
-		Board_EnableAuxPwr(0);
 		Board_EnableBoostConv(0);
-		Board_Enable5VBuck(0);
+//		Board_EnableDisplayPwr(0);
+		Board_CtrlDisplayBacklight(0);
 	}
 
 	state = en;
 	return APP_ERR_NONE;
 }
 
-static int8_t PollPowerSw(uint8_t *deviceSt)
-{
-	static uint16_t swCtr;
-	uint8_t swPressed = 0;
-	uint32_t uvCutoffSensed = 1;
-
-	if(Board_PowerSwSensed())
-	{
-		if(swCtr < POWER_SW_PRESS_THRESH)
-		{
-			swCtr++;
-		}
-		else
-		{
-			swPressed = 1;
-			swCtr = 0;
-		}
-	}
-	else
-	{
-		swCtr = 0;
-	}
-
-	if(swPressed)
-	{
-		/* Read Flash and Allow Board Power Ctrl */
-		Board_FlashRead(&uvCutoffSensed);
-
-		if(uvCutoffSensed)
-		{
-			*deviceSt = !(*deviceSt);
-			BoardPowerCtrl(*deviceSt);
-		}
-
-		/* Wait till Switch is released */
-		while(Board_PowerSwSensed())
-			APPHAL_Delay(100);
-	}
-
-	return APP_ERR_NONE;
-}
+//static int8_t PollPowerSw(uint8_t *deviceSt)
+//{
+//	static uint16_t swCtr;
+//	uint8_t swPressed = 0;
+//	uint32_t uvCutoffSensed = 1;
+//
+//	if(Board_PowerSwSensed())
+//	{
+//		if(swCtr < POWER_SW_PRESS_THRESH)
+//		{
+//			swCtr++;
+//		}
+//		else
+//		{
+//			swPressed = 1;
+//			swCtr = 0;
+//		}
+//	}
+//	else
+//	{
+//		swCtr = 0;
+//	}
+//
+//	if(swPressed)
+//	{
+//		/* Read Flash and Allow Board Power Ctrl */
+//		Board_FlashRead(&uvCutoffSensed);
+//
+//		if(uvCutoffSensed)
+//		{
+//			*deviceSt = !(*deviceSt);
+//			BoardPowerCtrl(*deviceSt);
+//		}
+//
+//		/* Wait till Switch is released */
+//		while(Board_PowerSwSensed())
+//			APPHAL_Delay(100);
+//	}
+//
+//	return APP_ERR_NONE;
+//}
 
 
 static int8_t BatteryMonitoring(bool en)
@@ -156,7 +157,7 @@ static int8_t BatteryMonitoring(bool en)
 static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 {
 	static uint8_t jackCtr = 0;
-	uint8_t curState = Board_PowerJackDet();
+	uint8_t curState; //= Board_PowerJackDet();
 	uint32_t uvCutoffSensed = 1;
 
 	if(curState == *prevState)
@@ -184,8 +185,6 @@ static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 				trice(iD(1183), "dbg: APP-MGR : Jack Detected\n");
 				*status = 0;
 				Board_EnableBoostConv(0);
-				Board_DisableBatChrg(0);
-				Board_Enable5VBuck(1);
 
 				/* Set Flash variable */
 				Board_FlashWrite(1);
@@ -205,25 +204,36 @@ static int8_t PollPowerJack(uint8_t *prevState, uint8_t *status)
 
 static int8_t Board_EEInit(void)
 {
-	EE_Status ee_status = EE_OK;
-	/* Unlock the Flash Program Erase controller */
-	HAL_FLASH_Unlock();
+	ee_status eeStatus = EE_OK;
+	eeObj.crc_object = EEPROM_EMULATION_CRC_HANDLE();
+	eeObj.f_object = EEPROM_EMULATION_FLASH_HANDLE();
+	eeObj.time_object = NULL;
 
-	ee_status = EE_Init(EE_FORCED_ERASE);
-	if(ee_status != EE_OK)
+	/* Unlock the Flash Program Erase controller */
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
 	{
 		return APP_ERR_STHAL;
 	}
+
+	eeStatus = EE_Init(&eeObj, EE_FORCED_ERASE);
+
 	/* Lock the Flash Program Erase controller */
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }
 
 static int8_t Board_FlashRead(uint32_t *data)
 {
-	EE_Status ee_status = EE_OK;
-
+	ee_status eeStatus = EE_OK;
 	uint16_t readAddress = FLASH_VAR_ADDRESS;
 
 	if(data == NULL)
@@ -231,34 +241,47 @@ static int8_t Board_FlashRead(uint32_t *data)
 		return APP_ERR_INV_ARG;
 	}
 
-	HAL_FLASH_Unlock();
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
-	ee_status = EE_ReadVariable32bits(readAddress, data);
-    if(ee_status != EE_OK)
-    {
-    	return APP_ERR_STHAL;
-    }
+	eeStatus = EE_ReadVariable32bits(readAddress, data);
 
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }
 
 static int8_t Board_FlashWrite(uint32_t data)
 {
-	EE_Status ee_status = EE_OK;
-
+	ee_status eeStatus = EE_OK;
 	uint16_t writeAddress = FLASH_VAR_ADDRESS;
 
-	HAL_FLASH_Unlock();
+	if(HAL_FLASH_ITF_Unlock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
-	ee_status = EE_WriteVariable32bits(writeAddress, data);
-    if(ee_status != EE_OK)
-    {
-    	return APP_ERR_STHAL;
-    }
+	eeStatus = EE_WriteVariable32bits(writeAddress, data);
 
-	HAL_FLASH_Lock();
+	if(HAL_FLASH_ITF_Lock(HAL_FLASH) != HAL_OK)
+	{
+		return APP_ERR_STHAL;
+	}
+
+	if(eeStatus != EE_OK)
+	{
+		return APP_ERR_STHAL;
+	}
 
 	return APP_ERR_NONE;
 }
@@ -278,9 +301,6 @@ static void AppMgrTask(void *args)
 	uint8_t isDeviceOn = 0;
 	uint8_t isRunningOnBat = 0;
 	uint8_t tempJackSt = 0;			// To Store Temp jack state
-
-	/* Enable Battery Charging */
-	Board_DisableBatChrg(0);
 
 	/* Enable battery Voltage divider */
 	Board_EnableBatVDiv(1);
@@ -316,7 +336,7 @@ static void AppMgrTask(void *args)
 			enFlashRead = 0;
 			BoardPowerCtrl(isDeviceOn);
 		}
-		PollPowerSw(&isDeviceOn);
+//		PollPowerSw(&isDeviceOn);
 		PollPowerJack(&tempJackSt, &isRunningOnBat);
 		BatteryMonitoring(isRunningOnBat);
 #endif

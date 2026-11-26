@@ -8,6 +8,8 @@
 #ifndef __THPY_MGR_H__
 #define __THPY_MGR_H__				1
 
+#include <stdint.h>
+
 /** TODO: Refactor ThpyMgr */
 
 int8_t ThpyMgrInit(void);

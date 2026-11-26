@@ -25,6 +25,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   app/app_main.c
   app/app_mgr.c
   app/diag_svc.c
+  # app/thpy_mgr.c
   app/press_regulator.c
   app/snsr_mgr.c
   bsp/board_v1_0.c

@@ -23,6 +23,7 @@ extern "C" {
 /* Define application specific settings macros here. */
 #define SELECT_BOARD                BOARD_ID_V1_0
 
+
 /* Task priorities and stack sizes. */
 #define THERAPY_MGR_PRIORITY		(tskIDLE_PRIORITY + 3)
 #define THERAPY_MGR_STACK_SIZE		512

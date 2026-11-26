@@ -46,7 +46,7 @@ void DiagSvcTask(void *args)
 		APPHAL_WDT_Clear();
 
 		/* Print diagnostics data from various services and subsystems */
-		ThpyMgrPrintDiags();
+//		ThpyMgrPrintDiags();
 		AppMgrPrintDiags();
 		/* Get remaining stack space of this task and log it */
 		space = uxTaskGetStackHighWaterMark(taskHandle) * sizeof(StackType_t);

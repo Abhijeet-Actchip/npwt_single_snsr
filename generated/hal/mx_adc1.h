@@ -30,13 +30,13 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
-/** Primary aliases for ADC1_IN0 pin */
-#define VBAT_SENS_PORT                        HAL_GPIOA
-#define VBAT_SENS_PIN                         HAL_GPIO_PIN_0
-
 /** Primary aliases for ADC1_IN1 pin */
 #define VACCUM_PRESSURE_PORT                  HAL_GPIOA
 #define VACCUM_PRESSURE_PIN                   HAL_GPIO_PIN_1
+
+/** Primary aliases for ADC1_IN0 pin */
+#define VBAT_SENS_PORT                        HAL_GPIOA
+#define VBAT_SENS_PIN                         HAL_GPIO_PIN_0
 
 /* Exported macros -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/

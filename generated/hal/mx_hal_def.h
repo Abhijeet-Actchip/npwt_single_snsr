@@ -28,10 +28,14 @@ extern "C" {
 #include "mx_def.h"
 #include "stm32_hal.h"
 #include "mx_adc1.h"
+#include "mx_cortex_debug.h"
 #include "mx_cortex_mpu.h"
 #include "mx_cortex_nvic.h"
+#include "mx_crc.h"
+#include "mx_flash.h"
 #include "mx_gpio_default.h"
 #include "mx_icache.h"
+#include "mx_iwdg.h"
 #include "mx_rcc.h"
 #include "mx_spi1.h"
 #include "mx_tim2.h"
@@ -77,6 +81,12 @@ extern "C" {
     ************************************************************* */
 
   /* *************************************************************
+    Cortex_DEBUG: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_cortex_debug_init
+    ************************************************************* */
+
+  /* *************************************************************
     Cortex_MPU: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_cortex_mpu_init
@@ -89,6 +99,18 @@ extern "C" {
     ************************************************************* */
 
   /* *************************************************************
+    CRC: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_crc_init
+    ************************************************************* */
+
+  /* *************************************************************
+    FLASH: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_flash_init
+    ************************************************************* */
+
+  /* *************************************************************
     gpio_default: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_gpio_default_init
@@ -98,6 +120,12 @@ extern "C" {
     ICACHE: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_icache_init
+    ************************************************************* */
+
+  /* *************************************************************
+    IWDG: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_iwdg_init
     ************************************************************* */
 
   /* *************************************************************
@@ -147,6 +175,12 @@ extern "C" {
     ************************************************************* */
 
   /* *************************************************************
+    Cortex_DEBUG: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_cortex_debug_deinit
+    ************************************************************* */
+
+  /* *************************************************************
     Cortex_MPU: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_cortex_mpu_deinit
@@ -159,6 +193,18 @@ extern "C" {
     ************************************************************* */
 
   /* *************************************************************
+    CRC: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_crc_deinit
+    ************************************************************* */
+
+  /* *************************************************************
+    FLASH: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_flash_deinit
+    ************************************************************* */
+
+  /* *************************************************************
     gpio_default: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_gpio_default_deinit
@@ -168,6 +214,12 @@ extern "C" {
     ICACHE: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_icache_deinit
+    ************************************************************* */
+
+  /* *************************************************************
+    IWDG: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_iwdg_deinit
     ************************************************************* */
 
   /* *************************************************************
@@ -211,6 +263,18 @@ extern "C" {
     ************************************************************* */
 
   /* *************************************************************
+    CRC: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_crc_gethandle
+    ************************************************************* */
+
+  /* *************************************************************
+    FLASH: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_flash_gethandle
+    ************************************************************* */
+
+  /* *************************************************************
     gpio_default / EXTI9: No EXTI software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_gpio_default_exti9_gethandle
@@ -250,6 +314,12 @@ extern "C" {
     ICACHE: No software label has been defined for this peripheral instance
       in the STM32CubeMX2 configuration panel.
       As a result, no aliases are generated for mx_icache_gethandle
+    ************************************************************* */
+
+  /* *************************************************************
+    IWDG: No software label has been defined for this peripheral instance
+      in the STM32CubeMX2 configuration panel.
+      As a result, no aliases are generated for mx_iwdg_gethandle
     ************************************************************* */
 
   /* *************************************************************

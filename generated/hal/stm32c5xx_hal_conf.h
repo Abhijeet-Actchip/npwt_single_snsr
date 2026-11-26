@@ -125,7 +125,7 @@ extern "C" {
 #define USE_HAL_AES_GCM_GMAC_ALGO               0U
 #define USE_HAL_AES_CCM_ALGO                    0U
 #define USE_HAL_AES_SUSPEND_RESUME              0U
-#define USE_HAL_AES_RNG_RECOVERY                1U
+#define USE_HAL_AES_RNG_RECOVERY                0U
 /**
   * @}
   */
@@ -138,7 +138,7 @@ extern "C" {
 #define USE_HAL_CCB_CLK_ENABLE_MODEL            HAL_CLK_ENABLE_NO
 #define USE_HAL_CCB_USER_DATA                   0U
 #define USE_HAL_CCB_GET_LAST_ERRORS             0U
-#define USE_HAL_CCB_RNG_RECOVERY                1U
+#define USE_HAL_CCB_RNG_RECOVERY                0U
 /**
   * @}
   */
@@ -186,7 +186,7 @@ extern "C" {
   * @{
   */
 /* ########################## HAL_CRC Config #################################### */
-#define USE_HAL_CRC_MODULE                      0U
+#define USE_HAL_CRC_MODULE                      1U
 #define USE_HAL_CRC_CLK_ENABLE_MODEL            HAL_CLK_ENABLE_NO
 #define USE_HAL_CRC_USER_DATA                   0U
 /**
@@ -289,13 +289,13 @@ extern "C" {
 /* ########################## HAL_FLASH Config ################################## */
 #define USE_HAL_FLASH_MODULE                    1U
 #define USE_HAL_FLASH_CLK_ENABLE_MODEL          HAL_CLK_ENABLE_NO
-#define USE_HAL_FLASH_REGISTER_CALLBACKS        0U
+#define USE_HAL_FLASH_REGISTER_CALLBACKS        1U
 #define USE_HAL_FLASH_USER_DATA                 0U
 #define USE_HAL_FLASH_GET_LAST_ERRORS           0U
 /* Use the FLASH program by address feature */
-#define USE_HAL_FLASH_PROGRAM_BY_ADDR           0U
+#define USE_HAL_FLASH_PROGRAM_BY_ADDR           1U
 /* Use the FLASH erase by address feature */
-#define USE_HAL_FLASH_ERASE_BY_ADDR             0U
+#define USE_HAL_FLASH_ERASE_BY_ADDR             1U
 /* Use the FLASH erase by PAGE feature */
 #define USE_HAL_FLASH_ERASE_PAGE                0U
 /* Use the FLASH bank erase feature */
@@ -303,9 +303,9 @@ extern "C" {
 /* Use the FLASH mass erase feature */
 #define USE_HAL_FLASH_MASS_ERASE                0U
 /* Use ECC errors handling APIs */
-#define USE_HAL_FLASH_ECC                       0U
+#define USE_HAL_FLASH_ECC                       1U
 /* Use FLASH HAL API for EDATA */
-#define USE_HAL_FLASH_OB_EDATA                  0U
+#define USE_HAL_FLASH_OB_EDATA                  1U
 /**
   * @}
   */
@@ -408,7 +408,7 @@ extern "C" {
   * @{
   */
 /* ########################## HAL_IWDG Config ################################### */
-#define USE_HAL_IWDG_MODULE                     0U
+#define USE_HAL_IWDG_MODULE                     1U
 #define USE_HAL_IWDG_REGISTER_CALLBACKS         0U
 #define USE_HAL_IWDG_USER_DATA                  0U
 /* IWDG time unit configuration */
@@ -463,7 +463,7 @@ extern "C" {
 #define USE_HAL_PCD_USB_LPM                     0U
 #define USE_HAL_PCD_USB_BCD                     0U
 #define USE_HAL_PCD_USB_EP_TYPE_ISOC            0U
-#define USE_HAL_PCD_MAX_ENDPOINT_NB             8U
+#define USE_HAL_PCD_MAX_ENDPOINT_NB             16U
 /**
   * @}
   */
@@ -477,7 +477,7 @@ extern "C" {
 #define USE_HAL_PKA_REGISTER_CALLBACKS          0U
 #define USE_HAL_PKA_USER_DATA                   0U
 #define USE_HAL_PKA_GET_LAST_ERRORS             0U
-#define USE_HAL_PKA_RNG_RECOVERY                1U
+#define USE_HAL_PKA_RNG_RECOVERY                0U
 /**
   * @}
   */
@@ -620,8 +620,8 @@ extern "C" {
 /* ########################## HAL_UART Config ################################### */
 #define USE_HAL_UART_MODULE                     1U
 #define USE_HAL_UART_CLK_ENABLE_MODEL           HAL_CLK_ENABLE_NO
-#define USE_HAL_UART_REGISTER_CALLBACKS         0U
-#define USE_HAL_UART_USER_DATA                  0U
+#define USE_HAL_UART_REGISTER_CALLBACKS         1U
+#define USE_HAL_UART_USER_DATA                  1U
 #define USE_HAL_UART_GET_LAST_ERRORS            0U
 #define USE_HAL_UART_DMA                        1U
 /**
