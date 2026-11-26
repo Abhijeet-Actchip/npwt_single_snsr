@@ -19,15 +19,22 @@ file(GLOB TRICE_SOURCES CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/app_utils/trice/*.c"
 )
 
+file(GLOB_RECURSE LVGL_SOURCES CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/app_middlewares/lvgl/src/*.c"
+)
+set_source_files_properties(${LVGL_SOURCES} PROPERTIES COMPILE_OPTIONS "-Os")
+
 # Stubs to be able to add compiler flag overrides, e.g. -Os
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   # Add additional source files here
   app/app_main.c
   app/app_mgr.c
   app/diag_svc.c
+  app/gui_mgr.c
   # app/thpy_mgr.c
   app/press_regulator.c
   app/snsr_mgr.c
+  app_drivers/lv_port_st7789.c
   bsp/board_v1_0.c
   app_hal/app_hal_delay.c
   app_hal/app_hal_spi.c
@@ -35,12 +42,14 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   manualtests/testsuite.c
   app_utils/assert/app_assert.c
   ${TRICE_SOURCES}
+  ${LVGL_SOURCES}
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
   # Add additional include directories here
   ${CMAKE_CURRENT_SOURCE_DIR}/config
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils/trice
+  ${CMAKE_CURRENT_SOURCE_DIR}/app_utils/trice
+  ${CMAKE_CURRENT_SOURCE_DIR}/app_middlewares/lvgl
 )
 
 target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC

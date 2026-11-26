@@ -23,6 +23,8 @@ extern "C" {
 #define RUN_FLASH_WRITE_TEST			0
 #define RUN_FLASH_READ_TEST				0
 #define RUN_BATTERY_CHARGING_TEST		0
+#define RUN_DISPLAY_TEXT_TEST			0
+#define RUN_DISPLAY_BUTTONS_TEST		0
 
 
 #ifdef __cplusplus

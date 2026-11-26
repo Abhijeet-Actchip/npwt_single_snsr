@@ -138,6 +138,25 @@ int8_t Board_CtrlDisplayBacklight(bool en)
 	return APP_ERR_NONE;
 }
 
+int8_t Board_EnableDisplayCS(bool en)
+{
+	HAL_GPIO_WritePin(DISPLAY_CS_PORT , DISPLAY_CS_PIN, en);
+	return APP_ERR_NONE;
+
+}
+
+int8_t Board_CtrlDisplayReset(bool en)
+{
+	HAL_GPIO_WritePin(DISPLAY_RESET_PORT , DISPLAY_RESET_PIN, en);
+	return APP_ERR_NONE;
+}
+
+int8_t Board_CtrlDisplayRS(bool en)
+{
+	HAL_GPIO_WritePin(DISPLAY_RS_PORT, DISPLAY_RS_PIN, en);
+	return APP_ERR_NONE;
+}
+
 int8_t Board_EnableVacuumMot(bool en)
 {
 	HAL_GPIO_WritePin(VACCUM_CTRL_EN_PORT, VACCUM_CTRL_EN_PIN, en);
