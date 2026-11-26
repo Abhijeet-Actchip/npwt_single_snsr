@@ -6,14 +6,10 @@
  */
 
 #include "gui_mgr.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "bsp/board.h"
-#include "app_hal/app_hal_delay.h"
+#include "ui_platform.h"
 #include "app_middlewares/lvgl/lvgl.h"
 #include "app_drivers/lv_port_st7789.h"
-#include "app_utils/trice/trice.h"
+#include "bsp/board.h"
 #include "app_utils/assert/app_assert.h"
 #include <stdio.h>
 
@@ -22,28 +18,29 @@
 /* Adjust if switches are active-high on hardware */
 #define KEYPAD_SW_ACTIVE_STATE		false
 
-typedef struct _gui_state_t
+typedef struct
 {
-	SemaphoreHandle_t lock;
+	ui_platform_mutex_t lock;
+	volatile bool isReady;
 	screen_id_t currScr;
-	
+
 	lv_obj_t *labTitle1;
 	lv_obj_t *labTitle2;
 	lv_obj_t *labTitle3;
-	
+
 	lv_obj_t *labVal1;
 	lv_obj_t *labVal2;
 	lv_obj_t *labVal3;
-}gui_state_t;
+} gui_state_t;
 
-static TaskHandle_t uiTaskHandle = NULL;
-static TaskHandle_t tickTaskHandle = NULL;
+static ui_platform_task_t uiTaskHandle  = NULL;
+static ui_platform_task_t tickTaskHandle = NULL;
 
 static gui_state_t state = {
 		.currScr = UI_NO_SCREEN
 };
 
-typedef struct _keypad_map_t
+typedef struct
 {
 	bool (*readFn)(void);
 	uint32_t lvKey;
@@ -79,15 +76,17 @@ static void KeypadReadCb(lv_indev_t *indev, lv_indev_data_t *data)
 
 static void GuiTickTask(void *args)
 {
+	(void)args;
 	while(1)
 	{
-		lv_tick_inc(GUI_TICK_DEL_MS);
-		APPHAL_Delay(GUI_TICK_DEL_MS);
+		UIPlatform_TickInc(GUI_TICK_DEL_MS);
+		UIPlatform_Delay(GUI_TICK_DEL_MS);
 	}
 }
 
 static void GuiMgrTask(void *args)
 {
+	(void)args;
 	int8_t retVal;
 
 	lv_init();
@@ -107,38 +106,40 @@ static void GuiMgrTask(void *args)
 	lv_group_set_default(defaultGroup);
 	lv_indev_set_group(keypadIndev, defaultGroup);
 
+	state.isReady = true;
+
 	while(1)
 	{
 		/* NOTE: lv_lock/lv_unlock is called internally */
 		lv_timer_handler();
-		APPHAL_Delay(GUI_REFRESH_DEL_MS);
+		UIPlatform_Delay(GUI_REFRESH_DEL_MS);
 	}
 }
 
 int8_t GuiMgrInit(void)
 {
-	BaseType_t status;
+	int8_t status;
 
-	state.lock = xSemaphoreCreateRecursiveMutex();
+	state.lock = UIPlatform_MutexCreate();
 	if(state.lock == NULL)
 	{
 		return APP_ERR_NO_MEM;
 	}
 
 	/* Create the GUI tick task. */
-	status = xTaskCreate(GuiTickTask, "GUITICK",
+	status = UIPlatform_CreateTask(GuiTickTask, "GUITICK",
 			GUI_TICK_STACK_SIZE, NULL,
-			GUI_TICK_PRIORITY, &tickTaskHandle);
-	if(status != pdPASS)
+			UI_PLATFORM_PRIO_HIGH, &tickTaskHandle);
+	if(status != APP_ERR_NONE)
 	{
 		return APP_ERR_NO_MEM;
 	}
 
 	/* Create the GUI manager task. */
-	status = xTaskCreate(GuiMgrTask, "GUIMGR",
+	status = UIPlatform_CreateTask(GuiMgrTask, "GUIMGR",
 			GUI_MGR_STACK_SIZE, NULL,
-			GUI_MGR_PRIORITY, &uiTaskHandle);
-	if(status != pdPASS)
+			UI_PLATFORM_PRIO_LOW, &uiTaskHandle);
+	if(status != APP_ERR_NONE)
 	{
 		return APP_ERR_NO_MEM;
 	}
@@ -146,22 +147,25 @@ int8_t GuiMgrInit(void)
 	return APP_ERR_NONE;
 }
 
+bool GuiMgrIsReady(void)
+{
+	return state.isReady;
+}
+
 static void AcquireLock(void)
 {
-	BaseType_t status;
-	status = xSemaphoreTake(state.lock, pdMS_TO_TICKS(1000));
-	APP_ASSERT(status == pdPASS);
+	UIPlatform_MutexLock(state.lock);
 }
 
 static void ReleaseLock(void)
 {
-	xSemaphoreGive(state.lock);
+	UIPlatform_MutexUnlock(state.lock);
 }
 
 int8_t GuiMgrShowScr(screen_id_t id)
 {
 	AcquireLock();
-	
+
 	if((id == UI_NO_SCREEN) || (id >= UI_MAX_SCREENS))
 	{
 		ReleaseLock();
@@ -190,13 +194,10 @@ int8_t GuiMgrShowScr(screen_id_t id)
 			lv_obj_set_style_text_font(state.labVal2, LV_FONT_DEFAULT_MONTSERRAT_14, LV_PART_MAIN);
 			lv_obj_set_style_text_font(state.labVal3, LV_FONT_DEFAULT_MONTSERRAT_14, LV_PART_MAIN);
 		}
-		
+
 		switch (id)
 		{
 			case UI_DO_SCREEN:
-				/* Show hidden labels. */
-//				lv_obj_clear_flag(state.labTitle3, LV_OBJ_FLAG_HIDDEN);
-//				lv_obj_clear_flag(state.labVal3, LV_OBJ_FLAG_HIDDEN);
 				lv_label_set_text(state.labTitle1, "DO");
 				lv_label_set_text(state.labTitle2, "PH");
 				lv_label_set_text(state.labTitle3, "SALINITY");
@@ -204,10 +205,8 @@ int8_t GuiMgrShowScr(screen_id_t id)
 				lv_obj_set_pos(state.labTitle2, 2, 50);
 				lv_obj_set_pos(state.labTitle3, 2, 70);
 				break;
+
 			case UI_CO2_SCREEN:
-				/* Show hidden labels. */
-//				lv_obj_clear_flag(state.labTitle3, LV_OBJ_FLAG_HIDDEN);
-//				lv_obj_clear_flag(state.labVal3, LV_OBJ_FLAG_HIDDEN);
 				lv_label_set_text(state.labTitle1, "CO2");
 				lv_label_set_text(state.labTitle2, "TURBIDITY");
 				lv_label_set_text(state.labTitle3, "CURRENT");
@@ -215,16 +214,14 @@ int8_t GuiMgrShowScr(screen_id_t id)
 				lv_obj_set_pos(state.labTitle2, 2, 50);
 				lv_obj_set_pos(state.labTitle3, 2, 70);
 				break;
-			case UI_TEMP_SCREEN:
-				/* Hide 2 labels. */
-//				lv_obj_add_flag(state.labTitle3, LV_OBJ_FLAG_HIDDEN);
-//				lv_obj_add_flag(state.labVal3, LV_OBJ_FLAG_HIDDEN);
 
+			case UI_TEMP_SCREEN:
 				lv_label_set_text(state.labTitle1, "PRESSURE");
 				lv_label_set_text(state.labTitle2, "TEMP");
 				lv_obj_set_pos(state.labTitle1, 2, 30);
 				lv_obj_set_pos(state.labTitle2, 2, 50);
 				break;
+
 			default:
 				APP_ASSERT(0);
 				break;
@@ -266,82 +263,22 @@ int8_t GuiMgrShowPrevScr(void)
 	return GuiMgrShowScr(prevScr);
 }
 
-//int8_t GuiMgrUpdateData(app_data_t *pData)
-//{
-//	if(pData == NULL)
-//	{
-//		return APP_ERR_INV_ARG;
-//	}
-//
-//	AcquireLock();
-//
-//	char printBuff[16];
-//
-//	switch(state.currScr)
-//	{
-//		case UI_DO_SCREEN:
-//			snprintf(printBuff, sizeof(printBuff), "%0.1f", pData->dOxygen);
-//			lv_label_set_text(state.labVal1, printBuff);
-//			snprintf(printBuff, sizeof(printBuff), "%0.1f", pData->ph);
-//			lv_label_set_text(state.labVal2, printBuff);
-//			snprintf(printBuff, sizeof(printBuff), "%0.1f", pData->salinity);
-//			lv_label_set_text(state.labVal3, printBuff);
-//			lv_obj_set_pos(state.labVal1, 85, 30);
-//			lv_obj_set_pos(state.labVal2, 85, 50);
-//			lv_obj_set_pos(state.labVal3, 85, 70);
-//			break;
-//		case UI_CO2_SCREEN:
-//			snprintf(printBuff, sizeof(printBuff), "%d", (int)pData->co2);
-//			lv_label_set_text(state.labVal1, printBuff);
-//			snprintf(printBuff, sizeof(printBuff), "%d", (int)pData->turbidity);
-//			lv_label_set_text(state.labVal2, printBuff);
-//			snprintf(printBuff, sizeof(printBuff), "%d", (int)pData->current);
-//			lv_label_set_text(state.labVal3, printBuff);
-//			lv_obj_set_pos(state.labVal1, 90, 30);
-//			lv_obj_set_pos(state.labVal2, 90, 50);
-//			lv_obj_set_pos(state.labVal3, 90, 70);
-//			break;
-//		case UI_TEMP_SCREEN:
-//			snprintf(printBuff, sizeof(printBuff), "%0.1f", pData->barPressure);
-//			lv_label_set_text(state.labVal1, printBuff);
-//			snprintf(printBuff, sizeof(printBuff), "%0.1f", pData->temp);
-//			lv_label_set_text(state.labVal2, printBuff);
-//			lv_obj_set_pos(state.labVal1, 85, 30);
-//			lv_obj_set_pos(state.labVal2, 85, 50);
-//			break;
-//		default:
-//			/* Invalid screen. */
-//			break;
-//	}
-//
-//	ReleaseLock();
-//
-//	return APP_ERR_NONE;
-//}
-
 void GuiMgrPrintDiags(void)
 {
+	uint32_t space;
+
 	if(uiTaskHandle != NULL)
 	{
-		uint32_t space = uxTaskGetStackHighWaterMark(uiTaskHandle) * sizeof(StackType_t);
-		trice32(iD(7110), "dbg: diag: GUIMGR stack rem = %d \n", space);
+		space = UIPlatform_TaskGetStackWatermark(uiTaskHandle);
+		(void)space;
+		/* TODO: Replace printf with TRICE log. */
 	}
 
 	if(tickTaskHandle != NULL)
 	{
-		uint32_t space = uxTaskGetStackHighWaterMark(tickTaskHandle) * sizeof(StackType_t);
-		trice32(iD(6806), "dbg: diag: GUITICK stack rem = %d \n", space);
+		space = UIPlatform_TaskGetStackWatermark(tickTaskHandle);
+		(void)space;
 	}
 
 	/* TODO: Monitor UI heap memory. */
-
-//	lv_mem_monitor_t mon;
-//	GuiAcquireLock();
-//	lv_mem_monitor(&mon);
-//	GuiReleaseLock();
-//
-//	ESP_LOGI(TAG, "used: %6d (%3d %%), frag: %3d %%, biggest free: %6d\n", (int)mon.total_size - mon.free_size,
-//		mon.used_pct,
-//		mon.frag_pct,
-//		(int)mon.free_biggest_size);
 }

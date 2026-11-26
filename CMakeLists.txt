@@ -31,6 +31,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   app/app_mgr.c
   app/diag_svc.c
   app/gui_mgr.c
+  app/ui_platform_embedded.c
   # app/thpy_mgr.c
   app/press_regulator.c
   app/snsr_mgr.c

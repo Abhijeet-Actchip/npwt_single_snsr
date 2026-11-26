@@ -9,6 +9,7 @@
 #define __GUI_MGR_H__				1
 
 #include <stdint.h>
+#include <stdbool.h>
 //#include "app_types.h"
 
 typedef enum _screen_id_t
@@ -21,6 +22,7 @@ typedef enum _screen_id_t
 }screen_id_t;
 
 int8_t GuiMgrInit(void);
+bool GuiMgrIsReady(void);
 
 int8_t GuiMgrShowScr(screen_id_t id);
 int8_t GuiMgrShowNextScr(void);
