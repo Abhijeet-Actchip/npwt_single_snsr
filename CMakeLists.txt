@@ -24,6 +24,16 @@ file(GLOB_RECURSE LVGL_SOURCES CONFIGURE_DEPENDS
 )
 set_source_files_properties(${LVGL_SOURCES} PROPERTIES COMPILE_OPTIONS "-Os")
 
+set(GUI_MGR_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screenhandler.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screens/boot_screen.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screens/thpy_select_screen.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screens/thpy_config_screen.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screens/thpy_run_screen.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/fonts/dot_matrix_26.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/fonts/dot_matrix_30.c"
+)
+
 # Stubs to be able to add compiler flag overrides, e.g. -Os
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   # Add additional source files here
@@ -42,6 +52,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   app_hal/app_hal_wdt.c
   manualtests/testsuite.c
   app_utils/assert/app_assert.c
+  ${GUI_MGR_SOURCES}
   ${TRICE_SOURCES}
   ${LVGL_SOURCES}
 )
@@ -49,6 +60,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
   # Add additional include directories here
   ${CMAKE_CURRENT_SOURCE_DIR}/config
+  ${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr
   ${CMAKE_CURRENT_SOURCE_DIR}/app_utils/trice
   ${CMAKE_CURRENT_SOURCE_DIR}/app_middlewares/lvgl
 )

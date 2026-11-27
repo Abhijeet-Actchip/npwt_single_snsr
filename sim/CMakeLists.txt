@@ -32,6 +32,16 @@ file(GLOB_RECURSE LVGL_SOURCES CONFIGURE_DEPENDS
 # Match embedded build: compile LVGL at -Os to keep binary small.
 set_source_files_properties(${LVGL_SOURCES} PROPERTIES COMPILE_OPTIONS "-Os")
 
+set(GUI_MGR_SOURCES
+    "${PROJ_ROOT}/gui_mgr/screenhandler.c"
+    "${PROJ_ROOT}/gui_mgr/screens/boot_screen.c"
+    "${PROJ_ROOT}/gui_mgr/screens/thpy_select_screen.c"
+    "${PROJ_ROOT}/gui_mgr/screens/thpy_config_screen.c"
+    "${PROJ_ROOT}/gui_mgr/screens/thpy_run_screen.c"
+    "${PROJ_ROOT}/gui_mgr/fonts/dot_matrix_26.c"
+    "${PROJ_ROOT}/gui_mgr/fonts/dot_matrix_30.c"
+)
+
 # ---------------------------------------------------------------------------
 # Simulator executable
 # ---------------------------------------------------------------------------
@@ -58,10 +68,11 @@ add_executable(npwt_sim
     mouse_cursor_icon.c
 
     # -----------------------------------------------------------------------
-    # Shared UI source — compiled unchanged for both embedded and simulator.
+    # Shared UI sources — compiled unchanged for both embedded and simulator.
     # Only the platform abstraction layer differs.
     # -----------------------------------------------------------------------
     ${PROJ_ROOT}/app/gui_mgr.c
+    ${GUI_MGR_SOURCES}
 
     # LVGL library
     ${LVGL_SOURCES}
@@ -77,6 +88,9 @@ target_include_directories(npwt_sim PRIVATE
 
     # Project root — resolves app/, bsp/, app_hal/, config/ etc.
     ${PROJ_ROOT}
+
+    # gui_mgr/ — screenhandler.h and screens/*.h
+    ${PROJ_ROOT}/gui_mgr
 
     # config/ — appconfig.h (DISP_HOR_RES, DISP_VER_RES, error codes)
     ${PROJ_ROOT}/config

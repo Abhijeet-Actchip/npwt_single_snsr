@@ -24,9 +24,8 @@ lv_display_t * hal_init(int32_t w, int32_t h)
     lv_indev_set_display(mousewheel, disp);
     lv_indev_set_group(mousewheel, lv_group_get_default());
 
-    lv_indev_t * kb = lv_sdl_keyboard_create();
-    lv_indev_set_display(kb, disp);
-    lv_indev_set_group(kb, lv_group_get_default());
+    /* Keyboard input is handled by gui_mgr.c KeypadReadCb via board_sim.c
+     * so arrow keys and Enter follow the exact embedded keypad code path. */
 
     return disp;
 }

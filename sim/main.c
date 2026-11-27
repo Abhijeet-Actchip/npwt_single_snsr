@@ -10,11 +10,14 @@
  */
 
 #include "app/gui_mgr.h"
+#include "gui_mgr/screenhandler.h"
 #include "sim/mock/mock_data.h"
 #include "app/ui_platform.h"
 #include "config/appconfig.h"
 #include <assert.h>
 #include <stdio.h>
+
+#define BOOT_SCR_DURATION_MS        5000U
 
 int main(void)
 {
@@ -31,8 +34,11 @@ int main(void)
         UIPlatform_Delay(10U);
     }
 
-    ret = GuiMgrShowScr(UI_DO_SCREEN);
-    assert(ret == APP_ERR_NONE);
+    UIInit();
+    UISelectScreen(UI_BOOT_SCREEN);
+
+    UIPlatform_Delay(BOOT_SCR_DURATION_MS);
+    UISelectScreen(UI_THPY_SELECT_SCREEN);
 
     /* Start mock sensor data feed. */
     MockDataStart();
