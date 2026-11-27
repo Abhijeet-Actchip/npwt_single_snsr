@@ -14,11 +14,13 @@
 #include <stdio.h>
 #include <string.h>
 
-LV_FONT_DECLARE(dot_matrix_26);
-LV_FONT_DECLARE(dot_matrix);
+LV_FONT_DECLARE(mono_16);
+LV_FONT_DECLARE(mono_24);
 
 #define RUN_TIMER_PERIOD_MS         1000U
-#define RUN_ACTION_Y_PX             205
+#define RUN_ACTION_Y_PX             178
+#define RUN_ACTION_BOX_LINE_SPACE   (-4)
+#define RUN_ACTION_CURSOR_Y_OFS     15
 #define RUN_PAUSE_X_PX              36
 #define RUN_STOP_X_PX               190
 
@@ -33,6 +35,7 @@ typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *statusLabel;
+    lv_obj_t *sepLabel;
     lv_obj_t *setPressLabel;
     lv_obj_t *achPressLabel;
     lv_obj_t *elapsedLabel;
@@ -88,7 +91,7 @@ static void RefreshDynamicLabels(void)
     snprintf(buf, sizeof(buf), "Elapsed     : %02u:%02u", (unsigned)mins, (unsigned)secs);
     lv_label_set_text(runUi.elapsedLabel, buf);
 
-    lv_label_set_text(runUi.pauseLabel, runUi.isPaused ? "RESUME" : "PAUSE");
+    lv_label_set_text(runUi.pauseLabel, runUi.isPaused ? "+--------+\n| RESUME |\n+--------+" : "+-------+\n| PAUSE |\n+-------+");
 }
 
 static void UpdateActionCursor(void)
@@ -96,7 +99,7 @@ static void UpdateActionCursor(void)
     int32_t xPos = (runUi.activeAction == RUN_ACTION_PAUSE_RESUME)
                    ? (RUN_PAUSE_X_PX - 16)
                    : (RUN_STOP_X_PX - 16);
-    lv_obj_set_pos(runUi.cursorLabel, xPos, RUN_ACTION_Y_PX);
+    lv_obj_set_pos(runUi.cursorLabel, xPos, RUN_ACTION_Y_PX + RUN_ACTION_CURSOR_Y_OFS);
 }
 
 static void ElapsedTimerCb(lv_timer_t *timer)
@@ -157,33 +160,40 @@ void ShowThpyRunScreen(void)
     runUi.achievedPressureMmHg = 0;
 
     runUi.statusLabel = lv_label_create(scr);
-    lv_obj_set_style_text_font(runUi.statusLabel, &dot_matrix, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.statusLabel, 16, 12);
+    lv_obj_set_style_text_font(runUi.statusLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_pos(runUi.statusLabel, 14, 6);
+
+    runUi.sepLabel = lv_label_create(scr);
+    lv_label_set_text(runUi.sepLabel, "------------------------------");
+    lv_obj_set_style_text_font(runUi.sepLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(runUi.sepLabel, 14, 34);
 
     runUi.setPressLabel = lv_label_create(scr);
-    lv_obj_set_style_text_font(runUi.setPressLabel, &dot_matrix_26, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.setPressLabel, 16, 60);
+    lv_obj_set_style_text_font(runUi.setPressLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(runUi.setPressLabel, 16, 64);
 
     runUi.achPressLabel = lv_label_create(scr);
-    lv_obj_set_style_text_font(runUi.achPressLabel, &dot_matrix_26, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.achPressLabel, 16, 95);
+    lv_obj_set_style_text_font(runUi.achPressLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(runUi.achPressLabel, 16, 94);
 
     runUi.elapsedLabel = lv_label_create(scr);
-    lv_obj_set_style_text_font(runUi.elapsedLabel, &dot_matrix_26, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.elapsedLabel, 16, 130);
+    lv_obj_set_style_text_font(runUi.elapsedLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(runUi.elapsedLabel, 16, 124);
 
     runUi.pauseLabel = lv_label_create(scr);
-    lv_obj_set_style_text_font(runUi.pauseLabel, &dot_matrix_26, LV_PART_MAIN);
+    lv_obj_set_style_text_font(runUi.pauseLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_style_text_line_space(runUi.pauseLabel, RUN_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
     lv_obj_set_pos(runUi.pauseLabel, RUN_PAUSE_X_PX, RUN_ACTION_Y_PX);
 
     runUi.stopLabel = lv_label_create(scr);
-    lv_label_set_text(runUi.stopLabel, "STOP");
-    lv_obj_set_style_text_font(runUi.stopLabel, &dot_matrix_26, LV_PART_MAIN);
+    lv_label_set_text(runUi.stopLabel, "+------+\n| STOP |\n+------+");
+    lv_obj_set_style_text_font(runUi.stopLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_style_text_line_space(runUi.stopLabel, RUN_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
     lv_obj_set_pos(runUi.stopLabel, RUN_STOP_X_PX, RUN_ACTION_Y_PX);
 
     runUi.cursorLabel = lv_label_create(scr);
     lv_label_set_text(runUi.cursorLabel, ">");
-    lv_obj_set_style_text_font(runUi.cursorLabel, &dot_matrix_26, LV_PART_MAIN);
+    lv_obj_set_style_text_font(runUi.cursorLabel, &mono_16, LV_PART_MAIN);
 
     RefreshDynamicLabels();
     UpdateActionCursor();

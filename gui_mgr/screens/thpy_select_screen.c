@@ -12,13 +12,13 @@
 #include "app_middlewares/lvgl/lvgl.h"
 #include <string.h>
 
-LV_FONT_DECLARE(dot_matrix_26);
-LV_FONT_DECLARE(dot_matrix);
+LV_FONT_DECLARE(mono_16);
+LV_FONT_DECLARE(mono_24);
 
 #define THPY_MODE_COUNT             3U
-#define THPY_ROW_START_Y_PX         65
-#define THPY_ROW_STEP_Y_PX          35
-#define THPY_CURSOR_X_PX            16
+#define THPY_ROW_START_Y_PX         72
+#define THPY_ROW_STEP_Y_PX          36
+#define THPY_CURSOR_X_PX            14
 #define THPY_TEXT_X_PX              34
 
 typedef struct
@@ -31,6 +31,7 @@ typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *titleLabel;
+    lv_obj_t *sepLabel;
     lv_obj_t *cursorLabel;
     lv_obj_t *modeLabels[THPY_MODE_COUNT];
     uint8_t activeIdx;
@@ -90,12 +91,17 @@ static void UICreateCharacterMenu(void)
 
     thpySelectComponents.titleLabel = lv_label_create(scr);
     lv_label_set_text(thpySelectComponents.titleLabel, "SELECT THERAPY");
-    lv_obj_set_style_text_font(thpySelectComponents.titleLabel, &dot_matrix, LV_PART_MAIN);
-    lv_obj_set_pos(thpySelectComponents.titleLabel, 16, 14);
+    lv_obj_set_style_text_font(thpySelectComponents.titleLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_pos(thpySelectComponents.titleLabel, 14, 6);
+
+    thpySelectComponents.sepLabel = lv_label_create(scr);
+    lv_label_set_text(thpySelectComponents.sepLabel, "------------------------------");
+    lv_obj_set_style_text_font(thpySelectComponents.sepLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(thpySelectComponents.sepLabel, 14, 34);
 
     thpySelectComponents.cursorLabel = lv_label_create(scr);
     lv_label_set_text(thpySelectComponents.cursorLabel, ">");
-    lv_obj_set_style_text_font(thpySelectComponents.cursorLabel, &dot_matrix_26, LV_PART_MAIN);
+    lv_obj_set_style_text_font(thpySelectComponents.cursorLabel, &mono_16, LV_PART_MAIN);
 
     for(uint8_t i = 0U; i < THPY_MODE_COUNT; i++)
     {
@@ -103,7 +109,7 @@ static void UICreateCharacterMenu(void)
         lv_obj_t *lbl = lv_label_create(scr);
 
         lv_label_set_text(lbl, thpyModeItems[i].label);
-        lv_obj_set_style_text_font(lbl, &dot_matrix_26, LV_PART_MAIN);
+        lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
         lv_obj_set_pos(lbl, THPY_TEXT_X_PX, yPos);
 
         thpySelectComponents.modeLabels[i] = lbl;

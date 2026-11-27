@@ -9,7 +9,7 @@
 #include "app_middlewares/lvgl/lvgl.h"
 #include <string.h>
 
-LV_FONT_DECLARE(dot_matrix);
+LV_FONT_DECLARE(mono_24);
 
 typedef struct
 {
@@ -28,7 +28,7 @@ static void UISetContent(void)
     lv_obj_set_width(bootScreenComponents.titleLabel, HORIZONTAL_RES - 16);
     lv_label_set_long_mode(bootScreenComponents.titleLabel, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(bootScreenComponents.titleLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_set_style_text_font(bootScreenComponents.titleLabel, &dot_matrix, LV_PART_MAIN);
+    lv_obj_set_style_text_font(bootScreenComponents.titleLabel, &mono_24, LV_PART_MAIN);
     lv_obj_center(bootScreenComponents.titleLabel);
 }
 

@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
-LV_FONT_DECLARE(dot_matrix_26);
-LV_FONT_DECLARE(dot_matrix);
+LV_FONT_DECLARE(mono_16);
+LV_FONT_DECLARE(mono_24);
 
 #define THPY_PRESS_MAX_VAL_MMHG     (-40)
 #define THPY_PRESS_MIN_VAL_MMHG     (-300)
@@ -30,9 +30,11 @@ LV_FONT_DECLARE(dot_matrix);
 #define CFG_MAX_ITEMS               6U
 #define CFG_CURSOR_X_PX             12
 #define CFG_TEXT_X_PX               28
-#define CFG_ROW_START_Y_PX          56
-#define CFG_ROW_STEP_Y_PX           30
-#define CFG_ACTION_Y_PX             202
+#define CFG_ROW_START_Y_PX          62
+#define CFG_ROW_STEP_Y_PX           26
+#define CFG_ACTION_Y_PX             178
+#define CFG_ACTION_BOX_LINE_SPACE   (-4)
+#define CFG_ACTION_CURSOR_Y_OFS     15
 
 typedef enum
 {
@@ -50,6 +52,7 @@ typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *titleLabel;
+    lv_obj_t *sepLabel;
     lv_obj_t *cursorLabel;
     lv_obj_t *itemLabels[CFG_MAX_ITEMS];
     cfg_item_id_t items[CFG_MAX_ITEMS];
@@ -105,7 +108,7 @@ static void RefreshItemText(uint8_t idx)
             break;
 
         case CFG_ITEM_MIN_PRESS_FIXED:
-            snprintf(buf, sizeof(buf), "Min Press   : 0 mmHg (fixed)");
+            snprintf(buf, sizeof(buf), "Min Press   : 0 mmHg");
             break;
 
         case CFG_ITEM_MIN_PRESS:
@@ -123,11 +126,11 @@ static void RefreshItemText(uint8_t idx)
             break;
 
         case CFG_ITEM_START:
-            snprintf(buf, sizeof(buf), "START");
+            snprintf(buf, sizeof(buf), "+-------+\n| START |\n+-------+");
             break;
 
         case CFG_ITEM_BACK:
-            snprintf(buf, sizeof(buf), "BACK");
+            snprintf(buf, sizeof(buf), "+------+\n| BACK |\n+------+");
             break;
 
         default:
@@ -141,7 +144,12 @@ static void RefreshItemText(uint8_t idx)
 static void UpdateCursor(void)
 {
     uint8_t idx = cfgUi.activeIdx;
-    lv_obj_set_pos(cfgUi.cursorLabel, cfgUi.posX[idx] - 16, cfgUi.posY[idx]);
+    int16_t yPos = cfgUi.posY[idx];
+    if((cfgUi.items[idx] == CFG_ITEM_START) || (cfgUi.items[idx] == CFG_ITEM_BACK))
+    {
+        yPos += CFG_ACTION_CURSOR_Y_OFS;
+    }
+    lv_obj_set_pos(cfgUi.cursorLabel, cfgUi.posX[idx] - 16, yPos);
 }
 
 static void MoveSelection(int8_t dir)
@@ -289,7 +297,11 @@ static void AddRowItem(cfg_item_id_t id, bool editable, int16_t x, int16_t y)
     uint8_t idx = cfgUi.itemCount;
     lv_obj_t *lbl = lv_label_create(cfgUi.screenHandle);
 
-    lv_obj_set_style_text_font(lbl, &dot_matrix_26, LV_PART_MAIN);
+    lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
+    if((id == CFG_ITEM_START) || (id == CFG_ITEM_BACK))
+    {
+        lv_obj_set_style_text_line_space(lbl, CFG_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
+    }
     lv_obj_set_pos(lbl, x, y);
 
     cfgUi.items[idx]      = id;
@@ -318,12 +330,17 @@ void ShowThpyConfigScreen(void)
 
     cfgUi.titleLabel = lv_label_create(scr);
     lv_label_set_text(cfgUi.titleLabel, ModeTitle(thpyConfig.mode));
-    lv_obj_set_style_text_font(cfgUi.titleLabel, &dot_matrix, LV_PART_MAIN);
-    lv_obj_set_pos(cfgUi.titleLabel, 16, 12);
+    lv_obj_set_style_text_font(cfgUi.titleLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_pos(cfgUi.titleLabel, 14, 6);
+
+    cfgUi.sepLabel = lv_label_create(scr);
+    lv_label_set_text(cfgUi.sepLabel, "------------------------------");
+    lv_obj_set_style_text_font(cfgUi.sepLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_set_pos(cfgUi.sepLabel, 14, 34);
 
     cfgUi.cursorLabel = lv_label_create(scr);
     lv_label_set_text(cfgUi.cursorLabel, ">");
-    lv_obj_set_style_text_font(cfgUi.cursorLabel, &dot_matrix_26, LV_PART_MAIN);
+    lv_obj_set_style_text_font(cfgUi.cursorLabel, &mono_16, LV_PART_MAIN);
 
     if(thpyConfig.mode == THPY_SEL_CONTINUOUS)
     {
