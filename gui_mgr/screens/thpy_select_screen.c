@@ -1,10 +1,8 @@
 /*
  * thpy_select_screen.c
  *
- * Character-display style therapy mode selection screen.
- * Displays 3 therapy modes (CONTINUOUS, CYCLIC, VARIABLE) with '>' beside
- * the active selection. Up/Down (or Left/Right) moves '>', Enter advances
- * to thpy_config.
+ * Displays 3 therapy mode buttons (CONTINUOUS, CYCLIC, VARIABLE).
+ * UP/DOWN navigates between options, ENTER selects and opens thpy_config.
  */
 
 #include "thpy_select_screen.h"
@@ -16,10 +14,10 @@ LV_FONT_DECLARE(mono_16);
 LV_FONT_DECLARE(mono_24);
 
 #define THPY_MODE_COUNT             3U
-#define THPY_ROW_START_Y_PX         72
-#define THPY_ROW_STEP_Y_PX          36
-#define THPY_CURSOR_X_PX            14
-#define THPY_TEXT_X_PX              34
+#define THPY_BTN_W_PX               240
+#define THPY_BTN_H_PX               44
+#define THPY_BTN_START_Y_PX         58
+#define THPY_BTN_STEP_Y_PX          56
 
 typedef struct
 {
@@ -31,10 +29,8 @@ typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *titleLabel;
-    lv_obj_t *sepLabel;
-    lv_obj_t *cursorLabel;
-    lv_obj_t *modeLabels[THPY_MODE_COUNT];
-    uint8_t activeIdx;
+    lv_obj_t *dividerLine;
+    lv_obj_t *modeBtns[THPY_MODE_COUNT];
 } thpy_select_components_t;
 
 static const thpy_mode_item_t thpyModeItems[THPY_MODE_COUNT] = {
@@ -46,86 +42,95 @@ static const thpy_mode_item_t thpyModeItems[THPY_MODE_COUNT] = {
 static thpy_select_components_t thpySelectComponents = { 0 };
 static thpy_sel_mode_t lastSelectedMode = THPY_SEL_CONTINUOUS;
 
-static void UpdateCursorPosition(void)
+static void ModeBtnClickCb(lv_event_t *e)
 {
-    int32_t yPos = THPY_ROW_START_Y_PX + ((int32_t)thpySelectComponents.activeIdx * THPY_ROW_STEP_Y_PX);
-    lv_obj_set_pos(thpySelectComponents.cursorLabel, THPY_CURSOR_X_PX, yPos);
-}
+    thpy_sel_mode_t mode = (thpy_sel_mode_t)(uintptr_t)lv_event_get_user_data(e);
 
-static void SelectCurrentMode(void)
-{
-    lastSelectedMode = thpyModeItems[thpySelectComponents.activeIdx].mode;
+    lastSelectedMode = mode;
     UISelectScreen(UI_THPY_CONFIG_SCREEN);
 }
 
-static void ScreenInputCb(lv_event_t *e)
+static void ModeBtnKeyCb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
+    uint32_t key = lv_event_get_key(e);
+    lv_group_t *grp = lv_group_get_default();
 
-    if(code == LV_EVENT_CLICKED)
+    if(grp == NULL)
     {
-        SelectCurrentMode();
         return;
     }
 
-    if(code == LV_EVENT_KEY)
+    if(key == LV_KEY_DOWN)
     {
-        uint32_t key = lv_event_get_key(e);
-
-        if(key == LV_KEY_DOWN)
-        {
-            thpySelectComponents.activeIdx = (uint8_t)((thpySelectComponents.activeIdx + 1U) % THPY_MODE_COUNT);
-            UpdateCursorPosition();
-        }
-        else if(key == LV_KEY_UP)
-        {
-            thpySelectComponents.activeIdx = (uint8_t)((thpySelectComponents.activeIdx + THPY_MODE_COUNT - 1U) % THPY_MODE_COUNT);
-            UpdateCursorPosition();
-        }
+        lv_group_focus_next(grp);
+    }
+    else if(key == LV_KEY_UP)
+    {
+        lv_group_focus_prev(grp);
     }
 }
 
-static void UICreateCharacterMenu(void)
+static void StyleActionButton(lv_obj_t *btn)
+{
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(btn, lv_color_hex(0x005A9C), LV_PART_MAIN);
+    lv_obj_set_style_border_width(btn, 2, LV_PART_MAIN);
+    lv_obj_set_style_radius(btn, 6, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_text_color(btn, lv_color_hex(0x1A1A1A), LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(btn, lv_color_hex(0x005A9C), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(btn, lv_color_hex(0x003D6B), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(btn, lv_color_white(), LV_PART_MAIN | LV_STATE_FOCUSED);
+}
+
+static void UICreateContent(void)
 {
     lv_obj_t *scr = thpySelectComponents.screenHandle;
+    lv_group_t *grp = lv_group_get_default();
 
     thpySelectComponents.titleLabel = lv_label_create(scr);
     lv_label_set_text(thpySelectComponents.titleLabel, "SELECT THERAPY");
     lv_obj_set_style_text_font(thpySelectComponents.titleLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_style_text_color(thpySelectComponents.titleLabel, lv_color_hex(0x005A9C), LV_PART_MAIN);
     lv_obj_set_pos(thpySelectComponents.titleLabel, 14, 6);
 
-    thpySelectComponents.sepLabel = lv_label_create(scr);
-    lv_label_set_text(thpySelectComponents.sepLabel, "------------------------------");
-    lv_obj_set_style_text_font(thpySelectComponents.sepLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(thpySelectComponents.sepLabel, 14, 34);
-
-    thpySelectComponents.cursorLabel = lv_label_create(scr);
-    lv_label_set_text(thpySelectComponents.cursorLabel, ">");
-    lv_obj_set_style_text_font(thpySelectComponents.cursorLabel, &mono_16, LV_PART_MAIN);
+    thpySelectComponents.dividerLine = lv_obj_create(scr);
+    lv_obj_set_size(thpySelectComponents.dividerLine, HORIZONTAL_RES - 28, 2);
+    lv_obj_set_pos(thpySelectComponents.dividerLine, 14, 38);
+    lv_obj_set_style_bg_color(thpySelectComponents.dividerLine, lv_color_hex(0x005A9C), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(thpySelectComponents.dividerLine, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(thpySelectComponents.dividerLine, 0, LV_PART_MAIN);
 
     for(uint8_t i = 0U; i < THPY_MODE_COUNT; i++)
     {
-        int32_t yPos = THPY_ROW_START_Y_PX + ((int32_t)i * THPY_ROW_STEP_Y_PX);
-        lv_obj_t *lbl = lv_label_create(scr);
+        int32_t yPos = THPY_BTN_START_Y_PX + ((int32_t)i * THPY_BTN_STEP_Y_PX);
+        lv_obj_t *btn = lv_button_create(scr);
 
+        lv_obj_set_size(btn, THPY_BTN_W_PX, THPY_BTN_H_PX);
+        lv_obj_align(btn, LV_ALIGN_TOP_MID, 0, yPos);
+        StyleActionButton(btn);
+
+        lv_obj_t *lbl = lv_label_create(btn);
         lv_label_set_text(lbl, thpyModeItems[i].label);
         lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
-        lv_obj_set_pos(lbl, THPY_TEXT_X_PX, yPos);
+        lv_obj_center(lbl);
 
-        thpySelectComponents.modeLabels[i] = lbl;
+        lv_obj_add_event_cb(btn, ModeBtnClickCb, LV_EVENT_CLICKED,
+                            (void *)(uintptr_t)thpyModeItems[i].mode);
+        lv_obj_add_event_cb(btn, ModeBtnKeyCb, LV_EVENT_KEY, NULL);
+
+        if(grp != NULL)
+        {
+            lv_group_add_obj(grp, btn);
+        }
+
+        thpySelectComponents.modeBtns[i] = btn;
     }
 
-    thpySelectComponents.activeIdx = 0U;
-    UpdateCursorPosition();
-
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_KEY, NULL);
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_CLICKED, NULL);
-
-    lv_group_t *grp = lv_group_get_default();
     if(grp != NULL)
     {
-        lv_group_add_obj(grp, scr);
-        lv_group_focus_obj(scr);
+        lv_group_focus_obj(thpySelectComponents.modeBtns[0]);
     }
 }
 
@@ -133,7 +138,7 @@ void ShowThpySelectScreen(void)
 {
     CreateScreen();
     thpySelectComponents.screenHandle = GetActiveScreenHandle();
-    UICreateCharacterMenu();
+    UICreateContent();
 }
 
 void ClearThpySelectStateVar(void)

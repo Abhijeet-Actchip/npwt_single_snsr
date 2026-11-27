@@ -1,12 +1,12 @@
 /*
  * thpy_config_screen.c
  *
- * Character-display style therapy configuration screen.
+ * Therapy configuration screen using simple LVGL button widgets.
  *
  * Navigation:
- *   Up / Down    : Move '>' between configurable fields, START, and BACK.
- *   Left / Right : Decrement / increment the active pressure or time field.
- *   Enter        : On START -> start therapy (UI_THPY_RUN_SCREEN).
+ *   UP / DOWN    : Move focus between configurable fields, START, and BACK.
+ *   LEFT / RIGHT : Decrement / increment the focused pressure or time field.
+ *   ENTER        : On START -> start therapy (UI_THPY_RUN_SCREEN).
  *                  On BACK  -> return to UI_THPY_SELECT_SCREEN.
  */
 
@@ -28,13 +28,14 @@ LV_FONT_DECLARE(mono_24);
 #define THPY_TIME_STEP_SEC          30U
 
 #define CFG_MAX_ITEMS               6U
-#define CFG_CURSOR_X_PX             12
-#define CFG_TEXT_X_PX               28
-#define CFG_ROW_START_Y_PX          62
-#define CFG_ROW_STEP_Y_PX           26
-#define CFG_ACTION_Y_PX             178
-#define CFG_ACTION_BOX_LINE_SPACE   (-4)
-#define CFG_ACTION_CURSOR_Y_OFS     15
+#define CFG_ROW_X_PX                14
+#define CFG_ROW_W_PX                (HORIZONTAL_RES - 28)
+#define CFG_ROW_H_PX                26
+#define CFG_ROW_START_Y_PX          50
+#define CFG_ROW_STEP_Y_PX           32
+#define CFG_ACTION_W_PX             116
+#define CFG_ACTION_H_PX             38
+#define CFG_ACTION_Y_PX             190
 
 typedef enum
 {
@@ -52,15 +53,11 @@ typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *titleLabel;
-    lv_obj_t *sepLabel;
-    lv_obj_t *cursorLabel;
+    lv_obj_t *dividerLine;
+    lv_obj_t *itemObjs[CFG_MAX_ITEMS];
     lv_obj_t *itemLabels[CFG_MAX_ITEMS];
     cfg_item_id_t items[CFG_MAX_ITEMS];
-    bool editable[CFG_MAX_ITEMS];
-    int16_t posX[CFG_MAX_ITEMS];
-    int16_t posY[CFG_MAX_ITEMS];
     uint8_t itemCount;
-    uint8_t activeIdx;
 } thpy_config_components_t;
 
 static thpy_config_components_t cfgUi = { 0 };
@@ -108,7 +105,7 @@ static void RefreshItemText(uint8_t idx)
             break;
 
         case CFG_ITEM_MIN_PRESS_FIXED:
-            snprintf(buf, sizeof(buf), "Min Press   : 0 mmHg");
+            snprintf(buf, sizeof(buf), "Min Press   : 0 mmHg (fixed)");
             break;
 
         case CFG_ITEM_MIN_PRESS:
@@ -126,11 +123,11 @@ static void RefreshItemText(uint8_t idx)
             break;
 
         case CFG_ITEM_START:
-            snprintf(buf, sizeof(buf), "+-------+\n| START |\n+-------+");
+            snprintf(buf, sizeof(buf), "START");
             break;
 
         case CFG_ITEM_BACK:
-            snprintf(buf, sizeof(buf), "+------+\n| BACK |\n+------+");
+            snprintf(buf, sizeof(buf), "BACK");
             break;
 
         default:
@@ -141,43 +138,8 @@ static void RefreshItemText(uint8_t idx)
     lv_label_set_text(cfgUi.itemLabels[idx], buf);
 }
 
-static void UpdateCursor(void)
-{
-    uint8_t idx = cfgUi.activeIdx;
-    int16_t yPos = cfgUi.posY[idx];
-    if((cfgUi.items[idx] == CFG_ITEM_START) || (cfgUi.items[idx] == CFG_ITEM_BACK))
-    {
-        yPos += CFG_ACTION_CURSOR_Y_OFS;
-    }
-    lv_obj_set_pos(cfgUi.cursorLabel, cfgUi.posX[idx] - 16, yPos);
-}
-
-static void MoveSelection(int8_t dir)
-{
-    uint8_t n = cfgUi.itemCount;
-    for(uint8_t step = 0U; step < n; step++)
-    {
-        if(dir > 0)
-        {
-            cfgUi.activeIdx = (uint8_t)((cfgUi.activeIdx + 1U) % n);
-        }
-        else
-        {
-            cfgUi.activeIdx = (uint8_t)((cfgUi.activeIdx + n - 1U) % n);
-        }
-
-        if(cfgUi.editable[cfgUi.activeIdx])
-        {
-            break;
-        }
-    }
-    UpdateCursor();
-}
-
 static int16_t StepPressure(int16_t val, int8_t dir)
 {
-    /* dir > 0 (Up): increase vacuum magnitude (-40 -> -300).
-     * dir < 0 (Down): decrease vacuum magnitude (-300 -> -40). */
     int16_t next = val - (dir * THPY_PRESS_STEP_MMHG);
     if(next < THPY_PRESS_MIN_VAL_MMHG)
     {
@@ -204,10 +166,8 @@ static uint16_t StepTime(uint16_t val, int8_t dir)
     return (uint16_t)next;
 }
 
-static void AdjustActiveValue(int8_t dir)
+static void AdjustItemValue(uint8_t idx, int8_t dir)
 {
-    uint8_t idx = cfgUi.activeIdx;
-
     switch(cfgUi.items[idx])
     {
         case CFG_ITEM_PRESSURE:
@@ -240,74 +200,155 @@ static void AdjustActiveValue(int8_t dir)
     }
 }
 
-static void HandleEnter(void)
+static void ItemClickCb(lv_event_t *e)
 {
-    cfg_item_id_t active = cfgUi.items[cfgUi.activeIdx];
+    uint8_t idx = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
+    cfg_item_id_t id = cfgUi.items[idx];
 
-    if(active == CFG_ITEM_START)
+    if(id == CFG_ITEM_START)
     {
         UISelectScreen(UI_THPY_RUN_SCREEN);
     }
-    else if(active == CFG_ITEM_BACK)
+    else if(id == CFG_ITEM_BACK)
     {
         UISelectScreen(UI_THPY_SELECT_SCREEN);
     }
     else
     {
-        /* Advance cursor toward START when pressing Enter on a parameter */
-        MoveSelection(1);
+        lv_group_t *grp = lv_group_get_default();
+        if(grp != NULL)
+        {
+            lv_group_focus_next(grp);
+        }
     }
 }
 
-static void ScreenInputCb(lv_event_t *e)
+static void ItemKeyCb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
+    uint8_t idx = (uint8_t)(uintptr_t)lv_event_get_user_data(e);
+    uint32_t key = lv_event_get_key(e);
+    lv_group_t *grp = lv_group_get_default();
 
-    if(code == LV_EVENT_CLICKED)
+    if(key == LV_KEY_DOWN)
     {
-        HandleEnter();
-        return;
+        if(grp != NULL)
+        {
+            lv_group_focus_next(grp);
+        }
     }
-
-    if(code == LV_EVENT_KEY)
+    else if(key == LV_KEY_UP)
     {
-        uint32_t key = lv_event_get_key(e);
-
-        if(key == LV_KEY_DOWN)
+        if(grp != NULL)
         {
-            MoveSelection(1);
+            lv_group_focus_prev(grp);
         }
-        else if(key == LV_KEY_UP)
-        {
-            MoveSelection(-1);
-        }
-        else if(key == LV_KEY_RIGHT)
-        {
-            AdjustActiveValue(1);
-        }
-        else if(key == LV_KEY_LEFT)
-        {
-            AdjustActiveValue(-1);
-        }
+    }
+    else if(key == LV_KEY_RIGHT)
+    {
+        AdjustItemValue(idx, 1);
+    }
+    else if(key == LV_KEY_LEFT)
+    {
+        AdjustItemValue(idx, -1);
     }
 }
 
-static void AddRowItem(cfg_item_id_t id, bool editable, int16_t x, int16_t y)
+static void StyleFieldButton(lv_obj_t *btn)
+{
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(btn, lv_color_hex(0xCCCCCC), LV_PART_MAIN);
+    lv_obj_set_style_border_width(btn, 1, LV_PART_MAIN);
+    lv_obj_set_style_radius(btn, 4, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_left(btn, 6, LV_PART_MAIN);
+    lv_obj_set_style_text_color(btn, lv_color_hex(0x1A1A1A), LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(btn, lv_color_hex(0x005A9C), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_border_color(btn, lv_color_hex(0x003D6B), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(btn, lv_color_white(), LV_PART_MAIN | LV_STATE_FOCUSED);
+}
+
+static void StyleActionButton(lv_obj_t *btn, uint32_t focusColorHex)
+{
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(btn, lv_color_hex(focusColorHex), LV_PART_MAIN);
+    lv_obj_set_style_border_width(btn, 2, LV_PART_MAIN);
+    lv_obj_set_style_radius(btn, 6, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_text_color(btn, lv_color_hex(0x1A1A1A), LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(btn, lv_color_hex(focusColorHex), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(btn, lv_color_white(), LV_PART_MAIN | LV_STATE_FOCUSED);
+}
+
+static void AddFieldRow(cfg_item_id_t id, bool editable, int16_t y)
 {
     uint8_t idx = cfgUi.itemCount;
-    lv_obj_t *lbl = lv_label_create(cfgUi.screenHandle);
+    lv_group_t *grp = lv_group_get_default();
 
-    lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
-    if((id == CFG_ITEM_START) || (id == CFG_ITEM_BACK))
+    cfgUi.items[idx] = id;
+
+    if(editable)
     {
-        lv_obj_set_style_text_line_space(lbl, CFG_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
+        lv_obj_t *btn = lv_button_create(cfgUi.screenHandle);
+        lv_obj_set_size(btn, CFG_ROW_W_PX, CFG_ROW_H_PX);
+        lv_obj_set_pos(btn, CFG_ROW_X_PX, y);
+        StyleFieldButton(btn);
+
+        lv_obj_t *lbl = lv_label_create(btn);
+        lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
+        lv_obj_align(lbl, LV_ALIGN_LEFT_MID, 0, 0);
+
+        lv_obj_add_event_cb(btn, ItemClickCb, LV_EVENT_CLICKED, (void *)(uintptr_t)idx);
+        lv_obj_add_event_cb(btn, ItemKeyCb, LV_EVENT_KEY, (void *)(uintptr_t)idx);
+
+        if(grp != NULL)
+        {
+            lv_group_add_obj(grp, btn);
+        }
+
+        cfgUi.itemObjs[idx]   = btn;
+        cfgUi.itemLabels[idx] = lbl;
     }
-    lv_obj_set_pos(lbl, x, y);
+    else
+    {
+        lv_obj_t *lbl = lv_label_create(cfgUi.screenHandle);
+        lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
+        lv_obj_set_style_text_color(lbl, lv_color_hex(0x555555), LV_PART_MAIN);
+        lv_obj_set_pos(lbl, CFG_ROW_X_PX + 6, y + 3);
+
+        cfgUi.itemObjs[idx]   = lbl;
+        cfgUi.itemLabels[idx] = lbl;
+    }
+
+    cfgUi.itemCount++;
+    RefreshItemText(idx);
+}
+
+static void AddActionButton(cfg_item_id_t id, int16_t x, uint32_t focusColorHex)
+{
+    uint8_t idx = cfgUi.itemCount;
+    lv_group_t *grp = lv_group_get_default();
+
+    lv_obj_t *btn = lv_button_create(cfgUi.screenHandle);
+    lv_obj_set_size(btn, CFG_ACTION_W_PX, CFG_ACTION_H_PX);
+    lv_obj_set_pos(btn, x, CFG_ACTION_Y_PX);
+    StyleActionButton(btn, focusColorHex);
+
+    lv_obj_t *lbl = lv_label_create(btn);
+    lv_obj_set_style_text_font(lbl, &mono_16, LV_PART_MAIN);
+    lv_obj_center(lbl);
+
+    lv_obj_add_event_cb(btn, ItemClickCb, LV_EVENT_CLICKED, (void *)(uintptr_t)idx);
+    lv_obj_add_event_cb(btn, ItemKeyCb, LV_EVENT_KEY, (void *)(uintptr_t)idx);
+
+    if(grp != NULL)
+    {
+        lv_group_add_obj(grp, btn);
+    }
 
     cfgUi.items[idx]      = id;
-    cfgUi.editable[idx]   = editable;
-    cfgUi.posX[idx]       = x;
-    cfgUi.posY[idx]       = y;
+    cfgUi.itemObjs[idx]   = btn;
     cfgUi.itemLabels[idx] = lbl;
     cfgUi.itemCount++;
 
@@ -320,7 +361,6 @@ void ShowThpyConfigScreen(void)
     lv_obj_t *scr = GetActiveScreenHandle();
     cfgUi.screenHandle = scr;
     cfgUi.itemCount    = 0U;
-    cfgUi.activeIdx    = 0U;
 
     thpyConfig.mode = ThpySelectGetSelectedMode();
     if(thpyConfig.mode == THPY_SEL_CYCLIC)
@@ -331,49 +371,42 @@ void ShowThpyConfigScreen(void)
     cfgUi.titleLabel = lv_label_create(scr);
     lv_label_set_text(cfgUi.titleLabel, ModeTitle(thpyConfig.mode));
     lv_obj_set_style_text_font(cfgUi.titleLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_style_text_color(cfgUi.titleLabel, lv_color_hex(0x005A9C), LV_PART_MAIN);
     lv_obj_set_pos(cfgUi.titleLabel, 14, 6);
 
-    cfgUi.sepLabel = lv_label_create(scr);
-    lv_label_set_text(cfgUi.sepLabel, "------------------------------");
-    lv_obj_set_style_text_font(cfgUi.sepLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(cfgUi.sepLabel, 14, 34);
-
-    cfgUi.cursorLabel = lv_label_create(scr);
-    lv_label_set_text(cfgUi.cursorLabel, ">");
-    lv_obj_set_style_text_font(cfgUi.cursorLabel, &mono_16, LV_PART_MAIN);
+    cfgUi.dividerLine = lv_obj_create(scr);
+    lv_obj_set_size(cfgUi.dividerLine, HORIZONTAL_RES - 28, 2);
+    lv_obj_set_pos(cfgUi.dividerLine, 14, 38);
+    lv_obj_set_style_bg_color(cfgUi.dividerLine, lv_color_hex(0x005A9C), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(cfgUi.dividerLine, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(cfgUi.dividerLine, 0, LV_PART_MAIN);
 
     if(thpyConfig.mode == THPY_SEL_CONTINUOUS)
     {
-        AddRowItem(CFG_ITEM_PRESSURE, true, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX);
+        AddFieldRow(CFG_ITEM_PRESSURE, true, CFG_ROW_START_Y_PX);
     }
     else if(thpyConfig.mode == THPY_SEL_CYCLIC)
     {
-        AddRowItem(CFG_ITEM_MAX_PRESS,       true,  CFG_TEXT_X_PX, CFG_ROW_START_Y_PX);
-        AddRowItem(CFG_ITEM_MIN_PRESS_FIXED, false, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + CFG_ROW_STEP_Y_PX);
-        AddRowItem(CFG_ITEM_ON_TIME,         true,  CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + (2 * CFG_ROW_STEP_Y_PX));
-        AddRowItem(CFG_ITEM_OFF_TIME,        true,  CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + (3 * CFG_ROW_STEP_Y_PX));
+        AddFieldRow(CFG_ITEM_MAX_PRESS,       true,  CFG_ROW_START_Y_PX);
+        AddFieldRow(CFG_ITEM_MIN_PRESS_FIXED, false, CFG_ROW_START_Y_PX + CFG_ROW_STEP_Y_PX);
+        AddFieldRow(CFG_ITEM_ON_TIME,         true,  CFG_ROW_START_Y_PX + (2 * CFG_ROW_STEP_Y_PX));
+        AddFieldRow(CFG_ITEM_OFF_TIME,        true,  CFG_ROW_START_Y_PX + (3 * CFG_ROW_STEP_Y_PX));
     }
     else
     {
-        AddRowItem(CFG_ITEM_MAX_PRESS, true, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX);
-        AddRowItem(CFG_ITEM_MIN_PRESS, true, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + CFG_ROW_STEP_Y_PX);
-        AddRowItem(CFG_ITEM_ON_TIME,   true, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + (2 * CFG_ROW_STEP_Y_PX));
-        AddRowItem(CFG_ITEM_OFF_TIME,  true, CFG_TEXT_X_PX, CFG_ROW_START_Y_PX + (3 * CFG_ROW_STEP_Y_PX));
+        AddFieldRow(CFG_ITEM_MAX_PRESS, true, CFG_ROW_START_Y_PX);
+        AddFieldRow(CFG_ITEM_MIN_PRESS, true, CFG_ROW_START_Y_PX + CFG_ROW_STEP_Y_PX);
+        AddFieldRow(CFG_ITEM_ON_TIME,   true, CFG_ROW_START_Y_PX + (2 * CFG_ROW_STEP_Y_PX));
+        AddFieldRow(CFG_ITEM_OFF_TIME,  true, CFG_ROW_START_Y_PX + (3 * CFG_ROW_STEP_Y_PX));
     }
 
-    AddRowItem(CFG_ITEM_START, true, 40,  CFG_ACTION_Y_PX);
-    AddRowItem(CFG_ITEM_BACK,  true, 180, CFG_ACTION_Y_PX);
-
-    UpdateCursor();
-
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_KEY, NULL);
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_CLICKED, NULL);
+    AddActionButton(CFG_ITEM_START, 28,  0x1E8E3E);
+    AddActionButton(CFG_ITEM_BACK,  176, 0x005A9C);
 
     lv_group_t *grp = lv_group_get_default();
     if(grp != NULL)
     {
-        lv_group_add_obj(grp, scr);
-        lv_group_focus_obj(scr);
+        lv_group_focus_obj(cfgUi.itemObjs[0]);
     }
 }
 

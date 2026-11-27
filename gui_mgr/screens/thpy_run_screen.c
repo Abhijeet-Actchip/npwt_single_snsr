@@ -1,9 +1,8 @@
 /*
  * thpy_run_screen.c
  *
- * Character-display style therapy running screen.
- * Displays therapy status, set pressure, achieved pressure, elapsed time,
- * and PAUSE/RESUME + STOP actions navigated with Left/Right and Enter.
+ * Therapy running screen using simple LVGL button widgets for PAUSE/RESUME and STOP.
+ * UP/DOWN moves focus between PAUSE/RESUME and STOP, ENTER executes.
  */
 
 #include "thpy_run_screen.h"
@@ -18,33 +17,25 @@ LV_FONT_DECLARE(mono_16);
 LV_FONT_DECLARE(mono_24);
 
 #define RUN_TIMER_PERIOD_MS         1000U
-#define RUN_ACTION_Y_PX             178
-#define RUN_ACTION_BOX_LINE_SPACE   (-4)
-#define RUN_ACTION_CURSOR_Y_OFS     15
-#define RUN_PAUSE_X_PX              36
-#define RUN_STOP_X_PX               190
-
-typedef enum
-{
-    RUN_ACTION_PAUSE_RESUME = 0,
-    RUN_ACTION_STOP,
-    RUN_ACTION_COUNT
-} run_action_t;
+#define RUN_BTN_W_PX                116
+#define RUN_BTN_H_PX                38
+#define RUN_ACTION_Y_PX             186
+#define RUN_PAUSE_X_PX              28
+#define RUN_STOP_X_PX               176
 
 typedef struct
 {
     lv_obj_t *screenHandle;
     lv_obj_t *statusLabel;
-    lv_obj_t *sepLabel;
+    lv_obj_t *dividerLine;
     lv_obj_t *setPressLabel;
     lv_obj_t *achPressLabel;
     lv_obj_t *elapsedLabel;
+    lv_obj_t *pauseBtn;
     lv_obj_t *pauseLabel;
-    lv_obj_t *stopLabel;
-    lv_obj_t *cursorLabel;
+    lv_obj_t *stopBtn;
     lv_timer_t *elapsedTimer;
     bool isPaused;
-    run_action_t activeAction;
     uint32_t elapsedSec;
     int16_t achievedPressureMmHg;
 } thpy_run_components_t;
@@ -91,15 +82,7 @@ static void RefreshDynamicLabels(void)
     snprintf(buf, sizeof(buf), "Elapsed     : %02u:%02u", (unsigned)mins, (unsigned)secs);
     lv_label_set_text(runUi.elapsedLabel, buf);
 
-    lv_label_set_text(runUi.pauseLabel, runUi.isPaused ? "+--------+\n| RESUME |\n+--------+" : "+-------+\n| PAUSE |\n+-------+");
-}
-
-static void UpdateActionCursor(void)
-{
-    int32_t xPos = (runUi.activeAction == RUN_ACTION_PAUSE_RESUME)
-                   ? (RUN_PAUSE_X_PX - 16)
-                   : (RUN_STOP_X_PX - 16);
-    lv_obj_set_pos(runUi.cursorLabel, xPos, RUN_ACTION_Y_PX + RUN_ACTION_CURSOR_Y_OFS);
+    lv_label_set_text(runUi.pauseLabel, runUi.isPaused ? "RESUME" : "PAUSE");
 }
 
 static void ElapsedTimerCb(lv_timer_t *timer)
@@ -112,102 +95,119 @@ static void ElapsedTimerCb(lv_timer_t *timer)
     }
 }
 
-static void HandleEnter(void)
+static void PauseBtnClickCb(lv_event_t *e)
 {
-    if(runUi.activeAction == RUN_ACTION_PAUSE_RESUME)
-    {
-        runUi.isPaused = !runUi.isPaused;
-        RefreshDynamicLabels();
-    }
-    else
-    {
-        UISelectScreen(UI_THPY_CONFIG_SCREEN);
-    }
+    (void)e;
+    runUi.isPaused = !runUi.isPaused;
+    RefreshDynamicLabels();
 }
 
-static void ScreenInputCb(lv_event_t *e)
+static void StopBtnClickCb(lv_event_t *e)
 {
-    lv_event_code_t code = lv_event_get_code(e);
+    (void)e;
+    UISelectScreen(UI_THPY_CONFIG_SCREEN);
+}
 
-    if(code == LV_EVENT_CLICKED)
+static void ActionBtnKeyCb(lv_event_t *e)
+{
+    uint32_t key = lv_event_get_key(e);
+    lv_group_t *grp = lv_group_get_default();
+
+    if(grp == NULL)
     {
-        HandleEnter();
         return;
     }
 
-    if(code == LV_EVENT_KEY)
+    if(key == LV_KEY_DOWN)
     {
-        uint32_t key = lv_event_get_key(e);
-
-        if((key == LV_KEY_UP) || (key == LV_KEY_DOWN))
-        {
-            runUi.activeAction = (runUi.activeAction == RUN_ACTION_PAUSE_RESUME)
-                                 ? RUN_ACTION_STOP
-                                 : RUN_ACTION_PAUSE_RESUME;
-            UpdateActionCursor();
-        }
+        lv_group_focus_next(grp);
     }
+    else if(key == LV_KEY_UP)
+    {
+        lv_group_focus_prev(grp);
+    }
+}
+
+static void StyleActionButton(lv_obj_t *btn, uint32_t focusColorHex)
+{
+    lv_obj_set_style_bg_color(btn, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_border_color(btn, lv_color_hex(focusColorHex), LV_PART_MAIN);
+    lv_obj_set_style_border_width(btn, 2, LV_PART_MAIN);
+    lv_obj_set_style_radius(btn, 6, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_text_color(btn, lv_color_hex(0x1A1A1A), LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(btn, lv_color_hex(focusColorHex), LV_PART_MAIN | LV_STATE_FOCUSED);
+    lv_obj_set_style_text_color(btn, lv_color_white(), LV_PART_MAIN | LV_STATE_FOCUSED);
 }
 
 void ShowThpyRunScreen(void)
 {
     CreateScreen();
     lv_obj_t *scr = GetActiveScreenHandle();
+    lv_group_t *grp = lv_group_get_default();
+
     runUi.screenHandle         = scr;
     runUi.isPaused             = false;
-    runUi.activeAction         = RUN_ACTION_PAUSE_RESUME;
     runUi.elapsedSec           = 0U;
     runUi.achievedPressureMmHg = 0;
 
     runUi.statusLabel = lv_label_create(scr);
     lv_obj_set_style_text_font(runUi.statusLabel, &mono_24, LV_PART_MAIN);
+    lv_obj_set_style_text_color(runUi.statusLabel, lv_color_hex(0x005A9C), LV_PART_MAIN);
     lv_obj_set_pos(runUi.statusLabel, 14, 6);
 
-    runUi.sepLabel = lv_label_create(scr);
-    lv_label_set_text(runUi.sepLabel, "------------------------------");
-    lv_obj_set_style_text_font(runUi.sepLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.sepLabel, 14, 34);
+    runUi.dividerLine = lv_obj_create(scr);
+    lv_obj_set_size(runUi.dividerLine, HORIZONTAL_RES - 28, 2);
+    lv_obj_set_pos(runUi.dividerLine, 14, 38);
+    lv_obj_set_style_bg_color(runUi.dividerLine, lv_color_hex(0x005A9C), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(runUi.dividerLine, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(runUi.dividerLine, 0, LV_PART_MAIN);
 
     runUi.setPressLabel = lv_label_create(scr);
     lv_obj_set_style_text_font(runUi.setPressLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.setPressLabel, 16, 64);
+    lv_obj_set_pos(runUi.setPressLabel, 16, 58);
 
     runUi.achPressLabel = lv_label_create(scr);
     lv_obj_set_style_text_font(runUi.achPressLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.achPressLabel, 16, 94);
+    lv_obj_set_pos(runUi.achPressLabel, 16, 92);
 
     runUi.elapsedLabel = lv_label_create(scr);
     lv_obj_set_style_text_font(runUi.elapsedLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.elapsedLabel, 16, 124);
+    lv_obj_set_pos(runUi.elapsedLabel, 16, 126);
 
-    runUi.pauseLabel = lv_label_create(scr);
+    runUi.pauseBtn = lv_button_create(scr);
+    lv_obj_set_size(runUi.pauseBtn, RUN_BTN_W_PX, RUN_BTN_H_PX);
+    lv_obj_set_pos(runUi.pauseBtn, RUN_PAUSE_X_PX, RUN_ACTION_Y_PX);
+    StyleActionButton(runUi.pauseBtn, 0x005A9C);
+    lv_obj_add_event_cb(runUi.pauseBtn, PauseBtnClickCb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(runUi.pauseBtn, ActionBtnKeyCb, LV_EVENT_KEY, NULL);
+
+    runUi.pauseLabel = lv_label_create(runUi.pauseBtn);
     lv_obj_set_style_text_font(runUi.pauseLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_style_text_line_space(runUi.pauseLabel, RUN_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.pauseLabel, RUN_PAUSE_X_PX, RUN_ACTION_Y_PX);
+    lv_obj_center(runUi.pauseLabel);
 
-    runUi.stopLabel = lv_label_create(scr);
-    lv_label_set_text(runUi.stopLabel, "+------+\n| STOP |\n+------+");
-    lv_obj_set_style_text_font(runUi.stopLabel, &mono_16, LV_PART_MAIN);
-    lv_obj_set_style_text_line_space(runUi.stopLabel, RUN_ACTION_BOX_LINE_SPACE, LV_PART_MAIN);
-    lv_obj_set_pos(runUi.stopLabel, RUN_STOP_X_PX, RUN_ACTION_Y_PX);
+    runUi.stopBtn = lv_button_create(scr);
+    lv_obj_set_size(runUi.stopBtn, RUN_BTN_W_PX, RUN_BTN_H_PX);
+    lv_obj_set_pos(runUi.stopBtn, RUN_STOP_X_PX, RUN_ACTION_Y_PX);
+    StyleActionButton(runUi.stopBtn, 0xD93025);
+    lv_obj_add_event_cb(runUi.stopBtn, StopBtnClickCb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(runUi.stopBtn, ActionBtnKeyCb, LV_EVENT_KEY, NULL);
 
-    runUi.cursorLabel = lv_label_create(scr);
-    lv_label_set_text(runUi.cursorLabel, ">");
-    lv_obj_set_style_text_font(runUi.cursorLabel, &mono_16, LV_PART_MAIN);
+    lv_obj_t *stopLbl = lv_label_create(runUi.stopBtn);
+    lv_label_set_text(stopLbl, "STOP");
+    lv_obj_set_style_text_font(stopLbl, &mono_16, LV_PART_MAIN);
+    lv_obj_center(stopLbl);
 
     RefreshDynamicLabels();
-    UpdateActionCursor();
 
     runUi.elapsedTimer = lv_timer_create(ElapsedTimerCb, RUN_TIMER_PERIOD_MS, NULL);
 
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_KEY, NULL);
-    lv_obj_add_event_cb(scr, ScreenInputCb, LV_EVENT_CLICKED, NULL);
-
-    lv_group_t *grp = lv_group_get_default();
     if(grp != NULL)
     {
-        lv_group_add_obj(grp, scr);
-        lv_group_focus_obj(scr);
+        lv_group_add_obj(grp, runUi.pauseBtn);
+        lv_group_add_obj(grp, runUi.stopBtn);
+        lv_group_focus_obj(runUi.pauseBtn);
     }
 }
 

@@ -32,6 +32,7 @@ set(GUI_MGR_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/screens/thpy_run_screen.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/fonts/mono_16.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/fonts/mono_24.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gui_mgr/fonts/mono_cm_96.c"
 )
 
 # Stubs to be able to add compiler flag overrides, e.g. -Os

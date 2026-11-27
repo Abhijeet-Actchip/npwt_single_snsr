@@ -40,6 +40,7 @@ set(GUI_MGR_SOURCES
     "${PROJ_ROOT}/gui_mgr/screens/thpy_run_screen.c"
     "${PROJ_ROOT}/gui_mgr/fonts/mono_16.c"
     "${PROJ_ROOT}/gui_mgr/fonts/mono_24.c"
+    "${PROJ_ROOT}/gui_mgr/fonts/mono_cm_96.c"
 )
 
 # ---------------------------------------------------------------------------

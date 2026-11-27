@@ -3,11 +3,18 @@
  * Bpp: 4
  * Opts: --bpp 4 --size 16 --no-compress --no-kerning --font C:\Users\abhij\.gemini\antigravity\brain\480c46d7-b09e-4b6e-8c22-91849b75ce18\scratch\DejaVuSansMono-Bold.ttf --range 0x20-0x7E --format lvgl --lv-font-name mono_16 -o d:\STMWorkspcae_2.3.0\npwt_single_cubemx2\npwt_single_snsr_cmake\gui_mgr\fonts\mono_16.c
  ******************************************************************************/
+#ifdef __has_include
+    #if __has_include("lvgl.h")
+        #ifndef LV_LVGL_H_INCLUDE_SIMPLE
+            #define LV_LVGL_H_INCLUDE_SIMPLE
+        #endif
+    #endif
+#endif
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
-#include "lvgl.h"
+    #include "lvgl.h"
 #else
-#include "lvgl/lvgl.h"
+    #include "lvgl/lvgl.h"
 #endif
 
 #ifndef MONO_16
