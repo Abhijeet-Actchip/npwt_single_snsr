@@ -6,6 +6,8 @@
  */
 
 #include "app_mgr.h"
+#include "gui_mgr.h"
+#include "gui_mgr/screenhandler.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "bsp/board.h"
@@ -35,6 +37,7 @@
 #define BATTERY_ADC_OFFSET				0.055f
 #define BATTERY_MAX_VOLTAGE				12.0
 #define GET_BATTERY_PERCENT(x)			((x / BATTERY_MAX_VOLTAGE) * 100)
+#define BOOT_SCR_DURATION_MS			5000U
 
 static TaskHandle_t taskHandle;
 static uint8_t enFlashRead = 0;
@@ -318,6 +321,16 @@ static void AppMgrTask(void *args)
 #if(DISABLE_POWER_SEQUENCING == 1)
 	bool doOnce = true;
 #endif
+
+	/* Wait for GUI manager to finish LVGL initialization, then show boot screen. */
+	while(!GuiMgrIsReady())
+	{
+		APPHAL_Delay(10);
+	}
+	UIInit();
+	UISelectScreen(UI_BOOT_SCREEN);
+	APPHAL_Delay(BOOT_SCR_DURATION_MS);
+	UISelectScreen(UI_THPY_SELECT_SCREEN);
 
 	while(1)
 	{
