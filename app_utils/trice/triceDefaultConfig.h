@@ -490,7 +490,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 
 //  #ifndef TRICE_TX_LOG_SUPPORT
-//  #define TRICE_TX_LOG_SUPPORT 1 // The device can use Trice statements like `trice( "msg:hello" );` The default is 1.
+//  #define TRICE_TX_LOG_SUPPORT 1 // The device can use Trice statements like `trice(iD(2066), "msg:hello" );` The default is 1.
 //  #endif
 //  
 //  #ifndef TRICE_TX_ABC_SUPPORT
@@ -506,19 +506,19 @@ extern "C" {
 //  #define TRICE_TX_SUPPORT (TRICE_TX_LOG_SUPPORT | TRICE_TX_ABC_SUPPORT | TRICE_TX_X0_COUNTED_BUFFER_SUPPORT)
 
 #if defined TRICE_TX_SUPPORT && TRICE_TX_SUPPORT == 0
-#define TRICE_TX_LOG_SUPPORT 0               // The device canot use Trice statements like `trice( "msg:hello" );`
+#define TRICE_TX_LOG_SUPPORT 0               // The device canot use Trice statements like `trice(iD(4918), "msg:hello" );`
 #define TRICE_TX_ABC_SUPPORT 0               // Disables Trice ABC command send macros. The device cannot use Trice statements like `trice32C( "cmd:setTime", buf, 1 );`
 #define TRICE_TX_X0_COUNTED_BUFFER_SUPPORT 0 // The device cannot use Trice statements like `triceX0( buf, len );`
 #endif
 
 #if defined TRICE_TX_SUPPORT && TRICE_TX_SUPPORT == 1
-#define TRICE_TX_LOG_SUPPORT 1               // The device can use Trice statements like `trice( "msg:hello" );`
+#define TRICE_TX_LOG_SUPPORT 1               // The device can use Trice statements like `trice(iD(7633), "msg:hello" );`
 #define TRICE_TX_ABC_SUPPORT 1               // Enables Trice ABC command send macros. The device can use Trice statements like `trice32C( "cmd:setTime", buf, 1 );`
 #define TRICE_TX_X0_COUNTED_BUFFER_SUPPORT 1 // The device can use Trice statements like `triceX0( buf, len );`
 #endif
 
 #ifndef TRICE_TX_LOG_SUPPORT
-#define TRICE_TX_LOG_SUPPORT 1 // The device can use Trice statements like `trice( "msg:hello" );` The default is 1.
+#define TRICE_TX_LOG_SUPPORT 1 // The device can use Trice statements like `trice(iD(3192), "msg:hello" );` The default is 1.
 #endif
 
 #ifndef TRICE_TX_ABC_SUPPORT

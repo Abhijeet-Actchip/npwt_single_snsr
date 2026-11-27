@@ -201,11 +201,11 @@ static inline void StartTestTask(TaskFunction_t taskFn, const char *taskName)
 			chrgSts = Board_GetBatChrgSts();
 			doneSts = Board_GetBatDoneSts();
 
-			trice8(iD(6309), "dbg: Digital Input 1 State: %d\n", di1);
-			trice8(iD(1672), "dbg: Digital Input 2 State: %d\n", di2);
-			trice8(iD(2983), "dbg: Digital Input 3 State: %d\n", di3);
-			trice8(iD(2984), "dbg: Digital Input 4 State: %d\n", di4);
-			trice8(iD(2985), "dbg: Digital Input 5 State: %d\n", di5);
+			trice8(iD(7541), "dbg: Digital Input 1 State: %d\n", di1);
+			trice8(iD(2916), "dbg: Digital Input 2 State: %d\n", di2);
+			trice8(iD(6213), "dbg: Digital Input 3 State: %d\n", di3);
+			trice8(iD(4000), "dbg: Digital Input 4 State: %d\n", di4);
+			trice8(iD(7147), "dbg: Digital Input 5 State: %d\n", di5);
 			trice8(iD(2986), "dbg: Battery Charge Status: %d\n", chrgSts);
 			trice8(iD(2987), "dbg: Battery Done Status: %d\n", doneSts);
 

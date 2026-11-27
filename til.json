@@ -1,0 +1,266 @@
+{
+	"1106": {
+		"Type": "trice32",
+		"Strg": "dbg: BatV = %0.2f V\\n"
+	},
+	"1183": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Jack Detected\\n"
+	},
+	"1246": {
+		"Type": "trice0",
+		"Strg": "dbg: Vacuum Motor Enabled\\n"
+	},
+	"1487": {
+		"Type": "trice",
+		"Strg": "dbg: EE Initialized...\\n"
+	},
+	"1586": {
+		"Type": "trice32",
+		"Strg": "Battery Charging status : %d\\n"
+	},
+	"1672": {
+		"Type": "trice8",
+		"Strg": "dbg: Switch DI2 State: %d\\n"
+	},
+	"1766": {
+		"Type": "trice0",
+		"Strg": "dbg : Pressure Regulator Enabled...\\n"
+	},
+	"1887": {
+		"Type": "trice0",
+		"Strg": "dbg: Vacuum Motor Enabled\\n"
+	},
+	"1950": {
+		"Type": "trice0",
+		"Strg": "dbg: Enable pins OFF (BatVDiv, VacMot, Boost, DispPwr, Backlight, Valve, LedPwrOn)\\n"
+	},
+	"2036": {
+		"Type": "trice",
+		"Strg": "dbg: Flash Unlock\\n"
+	},
+	"2058": {
+		"Type": "trice0",
+		"Strg": "dbg: Battery Divider Enabled\\n"
+	},
+	"2066": {
+		"Type": "trice",
+		"Strg": "msg:hello"
+	},
+	"2337": {
+		"Type": "trice32",
+		"Strg": "dbg: APP-MGR : uvCutoff State : %d\\n"
+	},
+	"2570": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: APPMGR stack rem = %d \\n"
+	},
+	"2916": {
+		"Type": "trice8",
+		"Strg": "dbg: Digital Input 2 State: %d\\n"
+	},
+	"2983": {
+		"Type": "trice8",
+		"Strg": "dbg: Switch DI3 State: %d\\n"
+	},
+	"2984": {
+		"Type": "trice8",
+		"Strg": "dbg: Switch DI4 State: %d\\n"
+	},
+	"2985": {
+		"Type": "trice8",
+		"Strg": "dbg: Switch DI5 State: %d\\n"
+	},
+	"2986": {
+		"Type": "trice8",
+		"Strg": "dbg: Battery Charge Status: %d\\n"
+	},
+	"2987": {
+		"Type": "trice8",
+		"Strg": "dbg: Battery Done Status: %d\\n"
+	},
+	"3089": {
+		"Type": "trice",
+		"Strg": "dbg: EE Init\\n"
+	},
+	"3120": {
+		"Type": "trice32",
+		"Strg": "dbg: Vac Pressure = %0.2f mmHg\\n"
+	},
+	"3192": {
+		"Type": "trice",
+		"Strg": "msg:hello"
+	},
+	"3327": {
+		"Type": "trice8",
+		"Strg": "dbg: Vacuum Motor Duty Cycle: %d\\n"
+	},
+	"3426": {
+		"Type": "trice0",
+		"Strg": "dbg: Boost Converter Enabled\\n"
+	},
+	"3620": {
+		"Type": "trice32",
+		"Strg": "dbg: Pressure SP = %.2f mmHg\\n"
+	},
+	"3714": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Battery greater than cutOff voltage \\n"
+	},
+	"3835": {
+		"Type": "trice32",
+		"Strg": "dbg: Value Read from Flash : %X\\n"
+	},
+	"3843": {
+		"Type": "trice32",
+		"Strg": "Battery voltage : %.3f V\\n"
+	},
+	"3951": {
+		"Type": "trice32",
+		"Strg": "dbg: APP-MGR : Flash flag update, uvCutOff state : %d\\n"
+	},
+	"4000": {
+		"Type": "trice8",
+		"Strg": "dbg: Digital Input 4 State: %d\\n"
+	},
+	"4066": {
+		"Type": "trice32",
+		"Strg": "dbg: Vacuum Motor Pressure = %.2f mmHg\\n"
+	},
+	"4099": {
+		"Type": "trice8",
+		"Strg": "dbg: Vacuum Motor Duty: %d\\n"
+	},
+	"4120": {
+		"Type": "trice32",
+		"Strg": "dbg: Value Read from Flash : %X\\n"
+	},
+	"4424": {
+		"Type": "trice0",
+		"Strg": "dbg: Boost Converter Enabled\\n"
+	},
+	"4544": {
+		"Type": "trice",
+		"Strg": "err::%u \\n"
+	},
+	"4744": {
+		"Type": "trice0",
+		"Strg": "dbg: Battery Divider Enabled\\n"
+	},
+	"4918": {
+		"Type": "trice",
+		"Strg": "msg:hello"
+	},
+	"4944": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Board Power ON\\n"
+	},
+	"5017": {
+		"Type": "trice32",
+		"Strg": "dbg: Vacuum Pressure = %.2f mmHg\\n"
+	},
+	"5018": {
+		"Type": "trice0",
+		"Strg": "err: Failed to read Vacuum Pressure\\n"
+	},
+	"5102": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: THPYMGR stack rem = %d \\n"
+	},
+	"5104": {
+		"Type": "trice32",
+		"Strg": "dbg: Battery Voltage = %.3f V\\n"
+	},
+	"5105": {
+		"Type": "trice0",
+		"Strg": "err: Failed to read Battery Voltage\\n"
+	},
+	"5326": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Board Power OFF\\n"
+	},
+	"5694": {
+		"Type": "trice0",
+		"Strg": "dbg: Vacuum Motor Enabled \\n"
+	},
+	"5738": {
+		"Type": "trice",
+		"Strg": "dbg: PRESSURE-REG: Neg Pressure increasing...\\n"
+	},
+	"5822": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: TriceHalfBufferDepthMax %d\\n"
+	},
+	"5846": {
+		"Type": "trice0",
+		"Strg": "dbg: Boost Converter Enabled\\n"
+	},
+	"6213": {
+		"Type": "trice8",
+		"Strg": "dbg: Digital Input 3 State: %d\\n"
+	},
+	"6275": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Battery under cutOff voltage\\n"
+	},
+	"6309": {
+		"Type": "trice8",
+		"Strg": "dbg: Switch DI1 State: %d\\n"
+	},
+	"6320": {
+		"Type": "trice0",
+		"Strg": "dbg: Battery Divider Enabled...\\n"
+	},
+	"6338": {
+		"Type": "trice8",
+		"Strg": "dbg: Vacuum Motor Duty Cycle: %d\\n"
+	},
+	"6568": {
+		"Type": "trice0",
+		"Strg": "dbg: Vacuum Motor Stopped\\n"
+	},
+	"7020": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: Diag Mgr stack rem = %d \\n"
+	},
+	"7147": {
+		"Type": "trice8",
+		"Strg": "dbg: Digital Input 5 State: %d\\n"
+	},
+	"7204": {
+		"Type": "trice32",
+		"Strg": "dbg: Value Written to Flash : %X\\n"
+	},
+	"7339": {
+		"Type": "trice",
+		"Strg": "dbg: Battery Divider Enable\\n"
+	},
+	"7412": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: TriceSingleMaxWordCount %d\\n"
+	},
+	"7541": {
+		"Type": "trice8",
+		"Strg": "dbg: Digital Input 1 State: %d\\n"
+	},
+	"7633": {
+		"Type": "trice",
+		"Strg": "msg:hello"
+	},
+	"7678": {
+		"Type": "trice32",
+		"Strg": "dbg: PRESSURE-REG:Set Pressure = %0.2f mmHg, Ref Pressure = %0.2f mmHg, Error = %0.2f\\n"
+	},
+	"7697": {
+		"Type": "trice",
+		"Strg": "dbg: APP-MGR : Jack not Detected\\n"
+	},
+	"7868": {
+		"Type": "TRICE_S",
+		"Strg": "err: Assert triggered %s "
+	},
+	"7870": {
+		"Type": "trice0",
+		"Strg": "dbg: Enable pins ON (BatVDiv, VacMot, Boost, DispPwr, Backlight, Valve, LedPwrOn)\\n"
+	}
+}
