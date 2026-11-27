@@ -12,6 +12,7 @@
 #include "bsp/board.h"
 #include "app_hal/app_hal_wdt.h"
 #include "app_hal/app_hal_delay.h"
+#include "gui_mgr.h"
 #include "thpy_mgr.h"
 #include "app_mgr.h"
 
@@ -48,6 +49,7 @@ void DiagSvcTask(void *args)
 		/* Print diagnostics data from various services and subsystems */
 //		ThpyMgrPrintDiags();
 		AppMgrPrintDiags();
+		GuiMgrPrintDiags();
 		/* Get remaining stack space of this task and log it */
 		space = uxTaskGetStackHighWaterMark(taskHandle) * sizeof(StackType_t);
 		trice32(iD(7020), "dbg: diag: Diag Mgr stack rem = %d \n", space);

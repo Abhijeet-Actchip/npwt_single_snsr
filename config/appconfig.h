@@ -45,7 +45,7 @@ extern "C" {
 
 /*!< Enable Watchdog timer. (Should be enabled on production builds
  * disabled when debugging.) */
-#define APP_WDT_EN					0
+#define APP_WDT_EN					1
 
 /* Error codes returned by functions. */
 #define APP_ERR_NONE                0

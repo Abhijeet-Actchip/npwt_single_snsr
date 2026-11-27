@@ -51,6 +51,10 @@
 		"File": "app_mgr.c",
 		"Line": 131
 	},
+	"2398": {
+		"File": "gui_mgr.c",
+		"Line": 168
+	},
 	"2570": {
 		"File": "app_mgr.c",
 		"Line": 381
@@ -147,6 +151,10 @@
 		"File": "testsuite.c",
 		"Line": 43
 	},
+	"4770": {
+		"File": "gui_mgr.c",
+		"Line": 162
+	},
 	"4918": {
 		"File": "triceDefaultConfig.h",
 		"Line": 509
@@ -189,7 +197,7 @@
 	},
 	"5822": {
 		"File": "diag_svc.c",
-		"Line": 56
+		"Line": 58
 	},
 	"5846": {
 		"File": "testsuite.c",
@@ -221,7 +229,7 @@
 	},
 	"7020": {
 		"File": "diag_svc.c",
-		"Line": 53
+		"Line": 55
 	},
 	"7147": {
 		"File": "testsuite.c",
@@ -237,7 +245,7 @@
 	},
 	"7412": {
 		"File": "diag_svc.c",
-		"Line": 55
+		"Line": 57
 	},
 	"7541": {
 		"File": "testsuite.c",

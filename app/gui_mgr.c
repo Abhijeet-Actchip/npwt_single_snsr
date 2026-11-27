@@ -10,6 +10,7 @@
 #include "app_middlewares/lvgl/lvgl.h"
 #include "app_drivers/lv_port_st7789.h"
 #include "bsp/board.h"
+#include "app_utils/trice/trice.h"
 #include "app_utils/assert/app_assert.h"
 #include <stdio.h>
 
@@ -158,12 +159,12 @@ void GuiMgrPrintDiags(void)
 	if(uiTaskHandle != NULL)
 	{
 		space = UIPlatform_TaskGetStackWatermark(uiTaskHandle);
-		(void)space;
+		trice32(iD(4770), "dbg: diag: GUIMGR stack rem = %d \n", space);
 	}
 
 	if(tickTaskHandle != NULL)
 	{
 		space = UIPlatform_TaskGetStackWatermark(tickTaskHandle);
-		(void)space;
+		trice32(iD(2398), "dbg: diag: LV_TICK_TASK stack rem = %d \n", space);
 	}
 }

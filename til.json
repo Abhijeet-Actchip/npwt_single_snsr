@@ -51,6 +51,10 @@
 		"Type": "trice32",
 		"Strg": "dbg: APP-MGR : uvCutoff State : %d\\n"
 	},
+	"2398": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: LV_TICK_TASK stack rem = %d \\n"
+	},
 	"2570": {
 		"Type": "trice32",
 		"Strg": "dbg: diag: APPMGR stack rem = %d \\n"
@@ -146,6 +150,10 @@
 	"4744": {
 		"Type": "trice0",
 		"Strg": "dbg: Battery Divider Enabled\\n"
+	},
+	"4770": {
+		"Type": "trice32",
+		"Strg": "dbg: diag: GUIMGR stack rem = %d \\n"
 	},
 	"4918": {
 		"Type": "trice",
